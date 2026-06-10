@@ -1,0 +1,202 @@
+{
+  "project": "CloseDriver",
+  "description": "WPF application to interface with FarDriver motor controllers over Bluetooth LE",
+  "phases": [
+    {
+      "name": "Pre-Phase 1: Meta-Tracking",
+      "tasks": [
+        {
+          "id": "0.1",
+          "title": "Create PRD.json",
+          "description": "Create a PRD.json tracking document mapping out all backlog tasks, their acceptance criteria, and completion flags.",
+          "acceptance_criteria": "PRD.json exists and is formatted correctly.",
+          "completed": true
+        }
+      ]
+    },
+    {
+      "name": "Phase 1: Project Setup & Core Structure",
+      "tasks": [
+        {
+          "id": "1.1",
+          "title": "Create CloseDriver.Core",
+          "description": "Create a .NET 8 Class Library named CloseDriver.Core and install CommunityToolkit.Mvvm, DI, and Logging packages.",
+          "acceptance_criteria": "Project compiles successfully.",
+          "completed": true
+        },
+        {
+          "id": "1.2",
+          "title": "Create CloseDriver.Wpf",
+          "description": "Create an empty WPF .NET 8 project named CloseDriver.Wpf that references CloseDriver.Core and configures the DI ServiceProvider.",
+          "acceptance_criteria": "Project compiles, runs, and displays an empty window.",
+          "completed": true
+        },
+        {
+          "id": "1.3",
+          "title": "Create CloseDriver.Tests",
+          "description": "Create a companion xUnit test project CloseDriver.Tests and reference CloseDriver.Core.",
+          "acceptance_criteria": "dotnet test runs and passes a dummy test.",
+          "completed": true
+        },
+        {
+          "id": "1.4",
+          "title": "Initialize Git Repository",
+          "description": "Initialize a Git repository using 'git flow' structure (with release as the main trunk and develop for check-ins), add a standard .NET/WPF .gitignore, commit the initial structure, and push to a new GitHub repository named CloseDriver.",
+          "acceptance_criteria": "git branch shows develop and release, and git remote -v shows the GitHub origin.",
+          "completed": false
+        },
+        {
+          "id": "1.5",
+          "title": "Create GitHub Actions Workflow",
+          "description": "Create a basic GitHub Actions workflow (.github/workflows/dotnet.yml) to automatically build the project and run xUnit tests on push to develop and release.",
+          "acceptance_criteria": "The workflow triggers on the next push and passes.",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "name": "Phase 2: Bluetooth Scanning & Device Selection",
+      "tasks": [
+        {
+          "id": "2.1",
+          "title": "Define IBluetoothService and Mock",
+          "description": "Define an IBluetoothService interface and create a mocked implementation for testing.",
+          "acceptance_criteria": "Interface and mock compile successfully.",
+          "completed": false
+        },
+        {
+          "id": "2.2",
+          "title": "Create MainViewModel and Scan Button",
+          "description": "Create MainViewModel with a 'Scan For Devices' command, and update MainWindow.xaml with a Top-Left docked button.",
+          "acceptance_criteria": "Unit test confirms the command triggers the scanning logic on the mock service.",
+          "completed": false
+        },
+        {
+          "id": "2.3",
+          "title": "Implement WindowsBluetoothService",
+          "description": "Implement WindowsBluetoothService using Windows.Devices.Bluetooth to actually scan for BLE devices.",
+          "acceptance_criteria": "Manual test: run the app, click scan, verify devices are found in the debug console.",
+          "completed": false
+        },
+        {
+          "id": "2.4",
+          "title": "Create DeviceDialog",
+          "description": "Create a modal DeviceDialog (View and ViewModel) containing a vertical list of devices. Link it to the Scan button.",
+          "acceptance_criteria": "Manual test: dialog opens, scan initiates, list populates.",
+          "completed": false
+        },
+        {
+          "id": "2.5",
+          "title": "Add Select Device Button",
+          "description": "Add a 'Select Device' button to the dialog, enabled only when a list item is selected. Clicking it tracks the device and closes the dialog.",
+          "acceptance_criteria": "Unit test confirms SelectedDevice updates correctly; Manual test confirms button behavior and dialog closure.",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "name": "Phase 3: Data Logging & Protocol Exploration",
+      "tasks": [
+        {
+          "id": "3.1",
+          "title": "Connect and Subscribe to Notifications",
+          "description": "Extend IBluetoothService to connect to the selected device and subscribe to characteristic notifications (read stream).",
+          "acceptance_criteria": "Unit test with mocked data stream.",
+          "completed": false
+        },
+        {
+          "id": "3.2",
+          "title": "Create DataLogger",
+          "description": "Create a DataLogger class that formats incoming byte arrays and writes them to a file with timestamps.",
+          "acceptance_criteria": "Unit test asserts the output file contents match the expected hex formatting.",
+          "completed": false
+        },
+        {
+          "id": "3.3",
+          "title": "Add Log To File Toggle",
+          "description": "Add a 'Log To File' toggle button to MainWindow.xaml (docked Top-Right), enabled only when a device is selected.",
+          "acceptance_criteria": "Unit test confirms command toggles state and initiates/stops the logger.",
+          "completed": false
+        },
+        {
+          "id": "3.4",
+          "title": "Live Test Logging",
+          "description": "Perform a live test with a FarDriver controller to log incoming data to a file.",
+          "acceptance_criteria": "Manual check of the generated log file for valid hex traffic.",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "name": "Phase 4: Protocol Reverse Engineering (Read)",
+      "tasks": [
+        {
+          "id": "4.1",
+          "title": "Port FardriverData C++ struct",
+          "description": "Port the 512-byte FardriverData C++ struct and bitfields from the C++ FarDriver repo into a C# FarDriverProtocolParser using StructLayout and bit-shifting.",
+          "acceptance_criteria": "Create automated unit tests that feed the raw hex data (from Phase 3) into the parser to ensure it correctly identifies frames and decodes the exact values.",
+          "completed": false
+        },
+        {
+          "id": "4.2",
+          "title": "Map Payload Bytes to Settings",
+          "description": "Map the parsed payload bytes to specific controller settings (e.g., voltage, limits, temperatures).",
+          "acceptance_criteria": "Unit tests asserting specific byte arrays yield the correct integer/float setting values based on the C++ math.",
+          "completed": false
+        },
+        {
+          "id": "4.3",
+          "title": "Implement Polling/Handshake",
+          "description": "Implement any necessary polling/handshake requests if the controller requires a prompt to send settings.",
+          "acceptance_criteria": "Unit tests asserting the correct request byte sequences are generated.",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "name": "Phase 5: Displaying Settings",
+      "tasks": [
+        {
+          "id": "5.1",
+          "title": "Create SettingsViewModel",
+          "description": "Create a SettingsViewModel that exposes the decoded settings as bindable properties.",
+          "acceptance_criteria": "Unit tests confirming that when the parser decodes a new frame, the ViewModel properties update (via INotifyPropertyChanged).",
+          "completed": false
+        },
+        {
+          "id": "5.2",
+          "title": "Design Settings UI",
+          "description": "Design and implement the UI (XAML) to display the settings in a structured way (e.g., tabs, grouped panels).",
+          "acceptance_criteria": "Manual UI verification with mocked data.",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "name": "Phase 6: Writing Settings & Authentication (Write)",
+      "tasks": [
+        {
+          "id": "6.1",
+          "title": "Investigate Authentication",
+          "description": "Investigate FarDriver authentication/binding.",
+          "acceptance_criteria": "Unit tests that replicate the phone's authentication byte sequence.",
+          "completed": false
+        },
+        {
+          "id": "6.2",
+          "title": "Implement Encoding Logic",
+          "description": "Implement encoding logic in FarDriverProtocolParser to convert setting changes back into byte frames.",
+          "acceptance_criteria": "Unit tests asserting that changing a setting yields the expected hex byte frame.",
+          "completed": false
+        },
+        {
+          "id": "6.3",
+          "title": "Add Edit Settings UI",
+          "description": "Add UI controls (textboxes, comboboxes) to edit settings, and a 'Save/Write' button to transmit them.",
+          "acceptance_criteria": "Unit tests confirming the save action encodes the data and calls the Bluetooth write service. Manual test on a real controller.",
+          "completed": false
+        }
+      ]
+    }
+  ]
+}
