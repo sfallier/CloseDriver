@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.Advertisement;
+using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using CloseDriver.Core.Interfaces;
 using CoreBluetoothDevice = CloseDriver.Core.Models.BluetoothDevice;
 
@@ -75,21 +77,111 @@ public class WindowsBluetoothService : IBluetoothService
         return Task.CompletedTask;
     }
 
-    public Task<bool> ConnectAsync(CoreBluetoothDevice device)
+    private BluetoothLEDevice? _connectedDevice;
+    private GattCharacteristic? _txCharacteristic;
+    private GattCharacteristic? _rxCharacteristic;
+
+    // Standard BLE Serial Service UUIDs, these might need to be adjusted for FarDriver specifically
+    // commonly it's something like 0xFFE0 / 0xFFE1 but we will try generic ones or let it be discovered
+    private static readonly Guid FarDriverServiceUuid = Guid.Parse("0000ffe0-0000-1000-8000-00805f9b34fb"); // Example standard TI CC254x SPP service
+    private static readonly Guid FarDriverRxCharacteristicUuid = Guid.Parse("0000ffe1-0000-1000-8000-00805f9b34fb");
+    private static readonly Guid FarDriverTxCharacteristicUuid = Guid.Parse("0000ffe1-0000-1000-8000-00805f9b34fb");
+
+    public async Task<bool> ConnectAsync(CoreBluetoothDevice device)
     {
-        // Implementation for connecting to characteristics will go here later
-        throw new NotImplementedException();
+        if (device.NativeDevice is not ulong bluetoothAddress)
+            return false;
+
+        try
+        {
+            _connectedDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bluetoothAddress);
+            if (_connectedDevice == null) return false;
+
+            _connectedDevice.ConnectionStatusChanged += OnConnectionStatusChanged;
+
+            var servicesResult = await _connectedDevice.GetGattServicesAsync();
+            if (servicesResult.Status != GattCommunicationStatus.Success)
+                return false;
+
+            foreach (var service in servicesResult.Services)
+            {
+                // We could filter by FarDriverServiceUuid, but for now let's just grab the first one that works or matching ones
+                var charsResult = await service.GetCharacteristicsAsync();
+                if (charsResult.Status == GattCommunicationStatus.Success)
+                {
+                    foreach (var c in charsResult.Characteristics)
+                    {
+                        if (c.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Notify))
+                        {
+                            _rxCharacteristic = c;
+                            var status = await c.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+                            if (status == GattCommunicationStatus.Success)
+                            {
+                                c.ValueChanged += OnCharacteristicValueChanged;
+                            }
+                        }
+                        if (c.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Write) || 
+                            c.CharacteristicProperties.HasFlag(GattCharacteristicProperties.WriteWithoutResponse))
+                        {
+                            _txCharacteristic = c;
+                        }
+                    }
+                }
+            }
+
+            return _rxCharacteristic != null; // Connected successfully if we can at least listen
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    private void OnConnectionStatusChanged(BluetoothLEDevice sender, object args)
+    {
+        if (sender.ConnectionStatus == BluetoothConnectionStatus.Disconnected)
+        {
+            _ = DisconnectAsync();
+        }
+    }
+
+    private void OnCharacteristicValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
+    {
+        var reader = Windows.Storage.Streams.DataReader.FromBuffer(args.CharacteristicValue);
+        var bytes = new byte[reader.UnconsumedBufferLength];
+        reader.ReadBytes(bytes);
+        
+        DataReceived?.Invoke(this, bytes);
     }
 
     public Task DisconnectAsync()
     {
-        // Implementation for disconnecting
-        throw new NotImplementedException();
+        if (_rxCharacteristic != null)
+        {
+            _rxCharacteristic.ValueChanged -= OnCharacteristicValueChanged;
+            _rxCharacteristic = null;
+        }
+
+        _txCharacteristic = null;
+
+        if (_connectedDevice != null)
+        {
+            _connectedDevice.ConnectionStatusChanged -= OnConnectionStatusChanged;
+            _connectedDevice.Dispose();
+            _connectedDevice = null;
+        }
+
+        return Task.CompletedTask;
     }
 
-    public Task<bool> WriteDataAsync(byte[] data)
+    public async Task<bool> WriteDataAsync(byte[] data)
     {
-        // Implementation for writing to characteristics
-        throw new NotImplementedException();
+        if (_txCharacteristic == null) return false;
+
+        var writer = new Windows.Storage.Streams.DataWriter();
+        writer.WriteBytes(data);
+        
+        var result = await _txCharacteristic.WriteValueAsync(writer.DetachBuffer());
+        return result == GattCommunicationStatus.Success;
     }
 }
