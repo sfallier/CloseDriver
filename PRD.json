@@ -76,21 +76,21 @@
           "title": "Implement WindowsBluetoothService",
           "description": "Implement WindowsBluetoothService using Windows.Devices.Bluetooth to actually scan for BLE devices.",
           "acceptance_criteria": "Manual test: run the app, click scan, verify devices are found in the debug console.",
-          "completed": false
+          "completed": true
         },
         {
           "id": "2.4",
           "title": "Create DeviceDialog",
           "description": "Create a modal DeviceDialog (View and ViewModel) containing a vertical list of devices. Link it to the Scan button.",
           "acceptance_criteria": "Manual test: dialog opens, scan initiates, list populates.",
-          "completed": false
+          "completed": true
         },
         {
           "id": "2.5",
           "title": "Add Select Device Button",
           "description": "Add a 'Select Device' button to the dialog, enabled only when a list item is selected. Clicking it tracks the device and closes the dialog.",
           "acceptance_criteria": "Unit test confirms SelectedDevice updates correctly; Manual test confirms button behavior and dialog closure.",
-          "completed": false
+          "completed": true
         }
       ]
     },

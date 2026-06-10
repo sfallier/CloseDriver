@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using CloseDriver.Core.Interfaces;
+using CloseDriver.Core.ViewModels;
+using CloseDriver.Wpf.Services;
 
 namespace CloseDriver.Wpf;
 
@@ -22,10 +26,23 @@ public partial class App : Application
     {
         var services = new ServiceCollection();
 
+        // Register Logging
+        services.AddLogging(configure => 
+        {
+            configure.AddDebug();
+            configure.SetMinimumLevel(LogLevel.Debug);
+        });
+
+        // Register Services
+        services.AddSingleton<IBluetoothService, WindowsBluetoothService>();
+
         // Register ViewModels
+        services.AddTransient<MainViewModel>();
+        services.AddTransient<DeviceDialogViewModel>();
 
         // Register Views
         services.AddTransient<MainWindow>();
+        services.AddTransient<CloseDriver.Wpf.Dialogs.DeviceDialog>();
 
         return services.BuildServiceProvider();
     }
