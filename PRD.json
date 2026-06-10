@@ -161,7 +161,7 @@
           "title": "Create SettingsViewModel",
           "description": "Create a SettingsViewModel that exposes the decoded settings as bindable properties.",
           "acceptance_criteria": "Unit tests confirming that when the parser decodes a new frame, the ViewModel properties update (via INotifyPropertyChanged).",
-          "completed": false
+          "completed": true
         },
         {
           "id": "5.2",

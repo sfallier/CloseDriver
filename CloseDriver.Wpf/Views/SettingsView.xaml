@@ -1,0 +1,76 @@
+<UserControl x:Class="CloseDriver.Wpf.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CloseDriver.Wpf.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </UserControl.Resources>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <TextBlock Text="Live Dashboard" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"/>
+        
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <WrapPanel Orientation="Horizontal" Visibility="{Binding HasData, Converter={StaticResource BooleanToVisibilityConverter}}">
+                
+                <GroupBox Header="General" Margin="5" Width="200">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <TextBlock Text="Voltage: " FontWeight="Bold" Width="100"/>
+                            <TextBlock Text="{Binding CurrentData.Voltage, StringFormat={}{0:F1} V}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <TextBlock Text="Battery: " FontWeight="Bold" Width="100"/>
+                            <TextBlock Text="{Binding CurrentData.BatteryPercentage, StringFormat={}{0:F1} %}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <TextBlock Text="Speed: " FontWeight="Bold" Width="100"/>
+                            <TextBlock Text="{Binding CurrentData.SpeedKph, StringFormat={}{0:F1} km/h}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="Motor" Margin="5" Width="200">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <TextBlock Text="Line Current: " FontWeight="Bold" Width="100"/>
+                            <TextBlock Text="{Binding CurrentData.LineCurrentAmps, StringFormat={}{0:F1} A}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <TextBlock Text="Motor Temp: " FontWeight="Bold" Width="100"/>
+                            <TextBlock Text="{Binding CurrentData.MotorTempFahrenheit, StringFormat={}{0:F1} °F}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <TextBlock Text="Mos Temp: " FontWeight="Bold" Width="100"/>
+                            <TextBlock Text="{Binding CurrentData.MosTempFahrenheit, StringFormat={}{0:F1} °F}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="Wheel Setup" Margin="5" Width="200">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <TextBlock Text="Ratio: " FontWeight="Bold" Width="100"/>
+                            <TextBlock Text="{Binding CurrentData.WheelRatio}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <TextBlock Text="Radius: " FontWeight="Bold" Width="100"/>
+                            <TextBlock Text="{Binding CurrentData.WheelRadius}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <TextBlock Text="Width: " FontWeight="Bold" Width="100"/>
+                            <TextBlock Text="{Binding CurrentData.WheelWidth}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+            </WrapPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
