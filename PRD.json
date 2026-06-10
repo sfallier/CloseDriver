@@ -43,14 +43,14 @@
           "title": "Initialize Git Repository",
           "description": "Initialize a Git repository using 'git flow' structure (with release as the main trunk and develop for check-ins), add a standard .NET/WPF .gitignore, commit the initial structure, and push to a new GitHub repository named CloseDriver.",
           "acceptance_criteria": "git branch shows develop and release, and git remote -v shows the GitHub origin.",
-          "completed": false
+          "completed": true
         },
         {
           "id": "1.5",
           "title": "Create GitHub Actions Workflow",
           "description": "Create a basic GitHub Actions workflow (.github/workflows/dotnet.yml) to automatically build the project and run xUnit tests on push to develop and release.",
           "acceptance_criteria": "The workflow triggers on the next push and passes.",
-          "completed": false
+          "completed": true
         }
       ]
     },
@@ -62,14 +62,14 @@
           "title": "Define IBluetoothService and Mock",
           "description": "Define an IBluetoothService interface and create a mocked implementation for testing.",
           "acceptance_criteria": "Interface and mock compile successfully.",
-          "completed": false
+          "completed": true
         },
         {
           "id": "2.2",
           "title": "Create MainViewModel and Scan Button",
           "description": "Create MainViewModel with a 'Scan For Devices' command, and update MainWindow.xaml with a Top-Left docked button.",
           "acceptance_criteria": "Unit test confirms the command triggers the scanning logic on the mock service.",
-          "completed": false
+          "completed": true
         },
         {
           "id": "2.3",
