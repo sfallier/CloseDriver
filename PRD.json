@@ -116,7 +116,7 @@
           "title": "Add Log To File Toggle",
           "description": "Add a 'Log To File' toggle button to MainWindow.xaml (docked Top-Right), enabled only when a device is selected.",
           "acceptance_criteria": "Unit test confirms command toggles state and initiates/stops the logger.",
-          "completed": false
+          "completed": true
         },
         {
           "id": "3.4",
