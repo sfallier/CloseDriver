@@ -168,7 +168,7 @@
           "title": "Design Settings UI",
           "description": "Design and implement the UI (XAML) to display the settings in a structured way (e.g., tabs, grouped panels).",
           "acceptance_criteria": "Manual UI verification with mocked data.",
-          "completed": false
+          "completed": true
         }
       ]
     },
