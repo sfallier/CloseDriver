@@ -1,8 +1,9 @@
 ﻿<Application x:Class="CloseDriver.Wpf.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:CloseDriver.Wpf">
+             xmlns:local="clr-namespace:CloseDriver.Wpf"
+             xmlns:converters="clr-namespace:CloseDriver.Wpf.Converters">
     <Application.Resources>
-         
+         <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
     </Application.Resources>
 </Application>

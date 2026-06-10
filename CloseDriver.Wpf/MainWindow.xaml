@@ -5,8 +5,32 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CloseDriver.Wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-
+        Title="CloseDriver" Height="450" Width="800">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <Button Content="Scan for Devices" Command="{Binding ScanForDevicesCommand}" Click="ScanButton_Click" Padding="10,5" Margin="0,0,10,0"/>
+                <TextBlock Text="Connected Device: " VerticalAlignment="Center" FontWeight="Bold"/>
+                <TextBlock Text="{Binding ConnectedDevice.Name, TargetNullValue='None'}" VerticalAlignment="Center" Margin="5,0,10,0"/>
+                <Button Content="Disconnect" Command="{Binding DisconnectCommand}" Padding="10,5" Visibility="{Binding ConnectedDevice, Converter={StaticResource NullToVisibilityConverter}}"/>
+            </StackPanel>
+            
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <ToggleButton Content="Log to File" IsChecked="{Binding IsLogging, Mode=OneWay}" Command="{Binding ToggleLoggingCommand}" Padding="10,5"/>
+            </StackPanel>
+        </Grid>
+        
+        <TextBlock Grid.Row="1" Text="Settings and Data goes here..." HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray" FontSize="18"/>
     </Grid>
 </Window>

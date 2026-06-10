@@ -1,13 +1,7 @@
-﻿using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
+using CloseDriver.Core.ViewModels;
+using CloseDriver.Wpf.Dialogs;
 
 namespace CloseDriver.Wpf;
 
@@ -16,8 +10,27 @@ namespace CloseDriver.Wpf;
 /// </summary>
 public partial class MainWindow : Window
 {
-    public MainWindow()
+    private readonly MainViewModel _viewModel;
+
+    public MainWindow(MainViewModel viewModel)
     {
         InitializeComponent();
+        _viewModel = viewModel;
+        DataContext = _viewModel;
+    }
+
+    private async void ScanButton_Click(object sender, RoutedEventArgs e)
+    {
+        var deviceDialog = App.Current.Services.GetRequiredService<DeviceDialog>();
+        var result = deviceDialog.ShowDialog();
+        
+        if (result == true)
+        {
+            var dialogViewModel = (DeviceDialogViewModel)deviceDialog.DataContext;
+            if (dialogViewModel.ConfirmedDevice != null)
+            {
+                await _viewModel.ConnectDeviceAsync(dialogViewModel.ConfirmedDevice);
+            }
+        }
     }
 }
