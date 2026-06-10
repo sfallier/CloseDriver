@@ -135,21 +135,21 @@
           "title": "Port FardriverData C++ struct",
           "description": "Port the 512-byte FardriverData C++ struct and bitfields from the C++ FarDriver repo into a C# FarDriverProtocolParser using StructLayout and bit-shifting.",
           "acceptance_criteria": "Create automated unit tests that feed the raw hex data (from Phase 3) into the parser to ensure it correctly identifies frames and decodes the exact values.",
-          "completed": false
+          "completed": true
         },
         {
           "id": "4.2",
           "title": "Map Payload Bytes to Settings",
           "description": "Map the parsed payload bytes to specific controller settings (e.g., voltage, limits, temperatures).",
           "acceptance_criteria": "Unit tests asserting specific byte arrays yield the correct integer/float setting values based on the C++ math.",
-          "completed": false
+          "completed": true
         },
         {
           "id": "4.3",
           "title": "Implement Polling/Handshake",
           "description": "Implement any necessary polling/handshake requests if the controller requires a prompt to send settings.",
           "acceptance_criteria": "Unit tests asserting the correct request byte sequences are generated.",
-          "completed": false
+          "completed": true
         }
       ]
     },
