@@ -180,21 +180,21 @@
           "title": "Investigate Authentication",
           "description": "Investigate FarDriver authentication/binding.",
           "acceptance_criteria": "Unit tests that replicate the phone's authentication byte sequence.",
-          "completed": false
+          "completed": true
         },
         {
           "id": "6.2",
           "title": "Implement Encoding Logic",
           "description": "Implement encoding logic in FarDriverProtocolParser to convert setting changes back into byte frames.",
           "acceptance_criteria": "Unit tests asserting that changing a setting yields the expected hex byte frame.",
-          "completed": false
+          "completed": true
         },
         {
           "id": "6.3",
           "title": "Add Edit Settings UI",
           "description": "Add UI controls (textboxes, comboboxes) to edit settings, and a 'Save/Write' button to transmit them.",
           "acceptance_criteria": "Unit tests confirming the save action encodes the data and calls the Bluetooth write service. Manual test on a real controller.",
-          "completed": false
+          "completed": true
         }
       ]
     }
