@@ -102,14 +102,14 @@
           "title": "Connect and Subscribe to Notifications",
           "description": "Extend IBluetoothService to connect to the selected device and subscribe to characteristic notifications (read stream).",
           "acceptance_criteria": "Unit test with mocked data stream.",
-          "completed": false
+          "completed": true
         },
         {
           "id": "3.2",
           "title": "Create DataLogger",
           "description": "Create a DataLogger class that formats incoming byte arrays and writes them to a file with timestamps.",
           "acceptance_criteria": "Unit test asserts the output file contents match the expected hex formatting.",
-          "completed": false
+          "completed": true
         },
         {
           "id": "3.3",
