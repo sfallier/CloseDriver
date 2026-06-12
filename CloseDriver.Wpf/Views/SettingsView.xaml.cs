@@ -7,8 +7,8 @@ namespace CloseDriver.Wpf.Views;
 /// </summary>
 public partial class SettingsView : UserControl
 {
-    public SettingsView()
-    {
-        InitializeComponent();
-    }
+	public SettingsView()
+	{
+		InitializeComponent();
+	}
 }

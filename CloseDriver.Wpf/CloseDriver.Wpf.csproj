@@ -5,17 +5,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.9" />
   </ItemGroup>
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net7.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+    <!-- Windows 11 build 22000 has CET shadow stacks but lacks SpecialUserModeApc;
+         disables the CET-compat PE flag so the .NET 9 runtime doesn't fail-fast on startup.
+         Remove this once the host OS is updated to 22H2+ (build 22621+). -->
+    <CETCompat>false</CETCompat>
   </PropertyGroup>
 
 </Project>

@@ -7,16 +7,16 @@ namespace CloseDriver.Core.Interfaces;
 
 public interface IBluetoothService
 {
-    event EventHandler<BluetoothDevice> DeviceDiscovered;
-    event EventHandler<byte[]> DataReceived;
-    
-    bool IsScanning { get; }
-    
-    Task StartScanningAsync();
-    Task StopScanningAsync();
-    
-    Task<bool> ConnectAsync(BluetoothDevice device);
-    Task DisconnectAsync();
-    
-    Task<bool> WriteDataAsync(byte[] data);
+	event EventHandler<BluetoothDevice> DeviceDiscovered;
+	event EventHandler<byte[]> DataReceived;
+
+	bool IsScanning { get; }
+
+	Task StartScanningAsync();
+	Task StopScanningAsync();
+
+	Task<bool> ConnectAsync(BluetoothDevice device);
+	Task DisconnectAsync();
+
+	Task<bool> WriteDataAsync(byte[] data);
 }

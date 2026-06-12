@@ -7,16 +7,16 @@ namespace CloseDriver.Wpf.Converters;
 
 public class NullToVisibilityConverter : IValueConverter
 {
-    public object VisibilityWhenNull { get; set; } = Visibility.Collapsed;
-    public object VisibilityWhenNotNull { get; set; } = Visibility.Visible;
+	public object VisibilityWhenNull { get; set; } = Visibility.Collapsed;
+	public object VisibilityWhenNotNull { get; set; } = Visibility.Visible;
 
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        return value == null ? VisibilityWhenNull : VisibilityWhenNotNull;
-    }
+	public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+	{
+		return value == null ? VisibilityWhenNull : VisibilityWhenNotNull;
+	}
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
+	public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+	{
+		throw new NotImplementedException();
+	}
 }
