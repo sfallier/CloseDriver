@@ -12,7 +12,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 	private readonly SynchronizationContext? _syncContext;
 
 	[ObservableProperty]
-	private FardriverData _currentData;
+	private FarDriverData _currentData;
 
 	[ObservableProperty]
 	private bool _hasData;

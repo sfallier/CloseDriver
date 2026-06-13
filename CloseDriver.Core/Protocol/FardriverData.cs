@@ -3,13 +3,13 @@ using System.Runtime.InteropServices;
 namespace CloseDriver.Core.Protocol;
 
 /// <summary>
-/// Port of the FardriverData C++ struct from jackhumbert/fardriver-controllers.
+/// Port of the FarDriverData C++ struct from jackhumbert/fardriver-controllers.
 /// Packed structure representing the 512-byte payload.
 /// Note: C# doesn't support bitfields directly in StructLayout, so we must use
 /// properties to mask and shift the underlying bytes/words.
 /// </summary>
 [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 512)]
-public struct FardriverData
+public struct FarDriverData
 {
 	// The C++ struct defines 26 separate 12-byte chunks (Addr00, Addr06, ..., AddrD0)
 	// plus some skipped bytes. To correctly map this, we can either define the exact byte offsets
