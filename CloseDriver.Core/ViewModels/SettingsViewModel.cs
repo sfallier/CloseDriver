@@ -11,11 +11,11 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 	private readonly IBluetoothService _bluetoothService;
 	private readonly SynchronizationContext? _syncContext;
 
+	// Nullable so bindings against CurrentData.* short-circuit (returning UnsetValue)
+	// before the first frame arrives, instead of dereferencing the uninitialized
+	// FarDriverData.Buffer through property getters.
 	[ObservableProperty]
-	private FarDriverData _currentData;
-
-	[ObservableProperty]
-	private bool _hasData;
+	private FarDriverData? _currentData;
 
 	public SettingsViewModel(IBluetoothService bluetoothService)
 	{
@@ -37,16 +37,11 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 				// Update properties on UI thread via the MVVM toolkit
 				if (_syncContext != null)
 				{
-					_syncContext.Send(_ =>
-					{
-						CurrentData = parsedData;
-						HasData = true;
-					}, null);
+					_syncContext.Send(_ => CurrentData = parsedData, null);
 				}
 				else
 				{
 					CurrentData = parsedData;
-					HasData = true;
 				}
 			}
 			catch (Exception ex)

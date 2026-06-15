@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CloseDriver.Core\CloseDriver.Core.csproj" />
+    <ProjectReference Include="..\CloseDriver.Bluetooth.Windows\CloseDriver.Bluetooth.Windows.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,7 +3,7 @@ using System.Windows;
 using CloseDriver.Core.Interfaces;
 using CloseDriver.Core.ViewModels;
 using CloseDriver.Wpf.Converters;
-using CloseDriver.Wpf.Services;
+using CloseDriver.Bluetooth.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

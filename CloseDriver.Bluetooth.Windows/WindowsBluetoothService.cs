@@ -1,65 +1,132 @@
 using CloseDriver.Core.Interfaces;
+using Microsoft.Extensions.Logging;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.Advertisement;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
+using Windows.Devices.Radios;
+using Windows.Storage.Streams;
 using CoreBluetoothDevice = CloseDriver.Core.Models.BluetoothDevice;
 
-namespace CloseDriver.Wpf.Services;
+namespace CloseDriver.Bluetooth.Windows;
 
 public class WindowsBluetoothService : IBluetoothService
 {
+	private readonly ILogger<WindowsBluetoothService>? _logger;
 	private BluetoothLEAdvertisementWatcher? _watcher;
 	private readonly Dictionary<ulong, CoreBluetoothDevice> _discoveredDevices = new();
+	private int _advertisementCount;
+	private BluetoothLEDevice? _connectedDevice;
+	private GattCharacteristic? _txCharacteristic;
+	private GattCharacteristic? _rxCharacteristic;
+
+	// Standard BLE Serial Service UUIDs, these might need to be adjusted for FarDriver specifically
+	// commonly it's something like 0xFFE0 / 0xFFE1 but we will try generic ones or let it be discovered
+	private static readonly Guid FarDriverServiceUuid = Guid.Parse("0000ffe0-0000-1000-8000-00805f9b34fb"); // Example standard TI CC254x SPP service
+	private static readonly Guid FarDriverRxCharacteristicUuid = Guid.Parse("0000ffe1-0000-1000-8000-00805f9b34fb");
+	private static readonly Guid FarDriverTxCharacteristicUuid = Guid.Parse("0000ffe1-0000-1000-8000-00805f9b34fb");
 
 	public event EventHandler<CoreBluetoothDevice>? DeviceDiscovered;
 	public event EventHandler<byte[]>? DataReceived;
 
 	public bool IsScanning { get; private set; }
 
-	public Task StartScanningAsync()
+	public WindowsBluetoothService(ILogger<WindowsBluetoothService>? logger = null)
+	{
+		_logger = logger;
+	}
+
+	public async Task StartScanningAsync()
 	{
 		if (IsScanning)
-			return Task.CompletedTask;
+			return;
 
 		_discoveredDevices.Clear();
+		_advertisementCount = 0;
 
-		_watcher = new BluetoothLEAdvertisementWatcher();
+		await LogRadioStateAsync();
+
+		_watcher = new BluetoothLEAdvertisementWatcher
+		{
+			// Active scanning sends SCAN_REQ packets so peripherals reply with their
+			// scan response (which usually carries the LocalName and full service UUID
+			// list). Without this most household BLE devices appear nameless.
+			ScanningMode = BluetoothLEScanningMode.Active,
+		};
+
 		_watcher.Received += OnAdvertisementReceived;
 		_watcher.Stopped += OnWatcherStopped;
 
 		_watcher.Start();
 		IsScanning = true;
+		_logger?.LogInformation("BLE advertisement watcher started (ScanningMode=Active, Status={Status}).", _watcher.Status);
+	}
 
-		return Task.CompletedTask;
+	private async Task LogRadioStateAsync()
+	{
+		try
+		{
+			var radios = await Radio.GetRadiosAsync();
+			var bt = radios.FirstOrDefault(r => r.Kind == RadioKind.Bluetooth);
+			if (bt == null)
+				_logger?.LogWarning("No Bluetooth radio found on this machine.");
+			else if (bt.State != RadioState.On)
+				_logger?.LogWarning("Bluetooth radio state is {State}; scan will return no results until it is On.", bt.State);
+			else
+				_logger?.LogInformation("Bluetooth radio '{Name}' is On.", bt.Name);
+		}
+		catch (Exception ex)
+		{
+			_logger?.LogWarning(ex, "Failed to query Bluetooth radio state.");
+		}
 	}
 
 	private void OnWatcherStopped(BluetoothLEAdvertisementWatcher sender, BluetoothLEAdvertisementWatcherStoppedEventArgs args)
 	{
 		IsScanning = false;
+		if (args.Error == BluetoothError.Success)
+			_logger?.LogInformation("BLE advertisement watcher stopped normally. Ads seen: {Count}.", _advertisementCount);
+		else
+			_logger?.LogError("BLE advertisement watcher stopped with error: {Error}. Ads seen: {Count}.", args.Error, _advertisementCount);
 	}
 
 	private void OnAdvertisementReceived(BluetoothLEAdvertisementWatcher sender, BluetoothLEAdvertisementReceivedEventArgs args)
 	{
-		// Avoid adding the same device repeatedly unless we want to update RSSI
-		if (!_discoveredDevices.ContainsKey(args.BluetoothAddress))
+		_advertisementCount++;
+
+		// LocalName arrives in different ad sections depending on the advertiser; Active scanning
+		// also delivers ScanResponse packets where the name typically lives. Fall back to MAC if missing.
+		var deviceName = args.Advertisement.LocalName;
+		var macFormatted = FormatMac(args.BluetoothAddress);
+
+		if (!_discoveredDevices.TryGetValue(args.BluetoothAddress, out var device))
 		{
-			var deviceName = args.Advertisement.LocalName;
-
-			// Some FarDriver controllers might have specific name prefixes, but we'll include all with names for now
-			if (!string.IsNullOrEmpty(deviceName))
+			device = new CoreBluetoothDevice
 			{
-				var device = new CoreBluetoothDevice
-				{
-					Id = args.BluetoothAddress.ToString(),
-					Name = deviceName,
-					Rssi = args.RawSignalStrengthInDBm,
-					NativeDevice = args.BluetoothAddress // Store the address to connect later
-				};
-
-				_discoveredDevices[args.BluetoothAddress] = device;
+				Id = args.BluetoothAddress.ToString(),
+				Name = string.IsNullOrWhiteSpace(deviceName) ? $"(unnamed) {macFormatted}" : deviceName,
+				Rssi = args.RawSignalStrengthInDBm,
+				NativeDevice = args.BluetoothAddress,
+			};
+			_discoveredDevices[args.BluetoothAddress] = device;
+			_logger?.LogDebug("BLE device discovered: {Name} [{Mac}] RSSI={Rssi} AdType={AdType}", device.Name, macFormatted, device.Rssi, args.AdvertisementType);
+			DeviceDiscovered?.Invoke(this, device);
+		}
+		else
+		{
+			// Upgrade name when a scan-response with the LocalName arrives later.
+			if (!string.IsNullOrWhiteSpace(deviceName) && device.Name.StartsWith("(unnamed)", StringComparison.Ordinal))
+			{
+				device.Name = deviceName;
+				_logger?.LogDebug("BLE device named via scan-response: {Name} [{Mac}]", deviceName, macFormatted);
 				DeviceDiscovered?.Invoke(this, device);
 			}
+			device.Rssi = args.RawSignalStrengthInDBm;
 		}
+	}
+
+	private static string FormatMac(ulong address)
+	{
+		return string.Join(":", BitConverter.GetBytes(address).Take(6).Reverse().Select(b => b.ToString("X2")));
 	}
 
 	public Task StopScanningAsync()
@@ -76,15 +143,7 @@ public class WindowsBluetoothService : IBluetoothService
 		return Task.CompletedTask;
 	}
 
-	private BluetoothLEDevice? _connectedDevice;
-	private GattCharacteristic? _txCharacteristic;
-	private GattCharacteristic? _rxCharacteristic;
 
-	// Standard BLE Serial Service UUIDs, these might need to be adjusted for FarDriver specifically
-	// commonly it's something like 0xFFE0 / 0xFFE1 but we will try generic ones or let it be discovered
-	private static readonly Guid FarDriverServiceUuid = Guid.Parse("0000ffe0-0000-1000-8000-00805f9b34fb"); // Example standard TI CC254x SPP service
-	private static readonly Guid FarDriverRxCharacteristicUuid = Guid.Parse("0000ffe1-0000-1000-8000-00805f9b34fb");
-	private static readonly Guid FarDriverTxCharacteristicUuid = Guid.Parse("0000ffe1-0000-1000-8000-00805f9b34fb");
 
 	public async Task<bool> ConnectAsync(CoreBluetoothDevice device)
 	{
@@ -147,7 +206,7 @@ public class WindowsBluetoothService : IBluetoothService
 
 	private void OnCharacteristicValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
 	{
-		var reader = Windows.Storage.Streams.DataReader.FromBuffer(args.CharacteristicValue);
+		var reader = DataReader.FromBuffer(args.CharacteristicValue);
 		var bytes = new byte[reader.UnconsumedBufferLength];
 		reader.ReadBytes(bytes);
 
@@ -179,7 +238,7 @@ public class WindowsBluetoothService : IBluetoothService
 		if (_txCharacteristic == null)
 			return false;
 
-		var writer = new Windows.Storage.Streams.DataWriter();
+		var writer = new DataWriter();
 		writer.WriteBytes(data);
 
 		var result = await _txCharacteristic.WriteValueAsync(writer.DetachBuffer());
