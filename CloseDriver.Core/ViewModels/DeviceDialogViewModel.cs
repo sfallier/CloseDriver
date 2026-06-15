@@ -19,12 +19,25 @@ public partial class DeviceDialogViewModel : ObservableObject
 	[NotifyCanExecuteChangedFor(nameof(SelectDeviceCommand))]
 	private BluetoothDevice? _selectedDevice;
 
+	[ObservableProperty]
+	private string _statusMessage = string.Empty;
+
+	[ObservableProperty]
+	private bool _isStatusError;
+
 	public BluetoothDevice? ConfirmedDevice { get; private set; }
 
 	public DeviceDialogViewModel(IBluetoothService bluetoothService)
 	{
 		_bluetoothService = bluetoothService;
 		_bluetoothService.DeviceDiscovered += OnDeviceDiscovered;
+		_bluetoothService.ScanStatusChanged += OnScanStatusChanged;
+	}
+
+	private void OnScanStatusChanged(object? sender, ScanStatus status)
+	{
+		StatusMessage = status.Message;
+		IsStatusError = status.IsError;
 	}
 
 	private void OnDeviceDiscovered(object? sender, BluetoothDevice device)
@@ -72,6 +85,7 @@ public partial class DeviceDialogViewModel : ObservableObject
 	public async Task CleanupAsync()
 	{
 		_bluetoothService.DeviceDiscovered -= OnDeviceDiscovered;
+		_bluetoothService.ScanStatusChanged -= OnScanStatusChanged;
 		await _bluetoothService.StopScanningAsync();
 	}
 }

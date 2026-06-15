@@ -9,6 +9,7 @@ public interface IBluetoothService
 {
 	event EventHandler<BluetoothDevice> DeviceDiscovered;
 	event EventHandler<byte[]> DataReceived;
+	event EventHandler<ScanStatus> ScanStatusChanged;
 
 	bool IsScanning { get; }
 

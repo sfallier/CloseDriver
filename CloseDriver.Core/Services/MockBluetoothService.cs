@@ -9,6 +9,7 @@ public class MockBluetoothService : IBluetoothService
 {
 	public event EventHandler<BluetoothDevice>? DeviceDiscovered;
 	public event EventHandler<byte[]>? DataReceived;
+	public event EventHandler<ScanStatus>? ScanStatusChanged;
 
 	public bool IsScanning { get; private set; }
 
@@ -18,6 +19,7 @@ public class MockBluetoothService : IBluetoothService
 			return;
 
 		IsScanning = true;
+		ScanStatusChanged?.Invoke(this, new ScanStatus(true, "Scanning for devices...", false));
 
 		// Simulate finding a few devices
 		_ = Task.Run(async () =>

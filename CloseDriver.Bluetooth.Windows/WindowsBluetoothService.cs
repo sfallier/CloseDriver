@@ -5,6 +5,7 @@ using Windows.Devices.Bluetooth.Advertisement;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.Radios;
 using Windows.Storage.Streams;
+using CloseDriver.Core.Models;
 using CoreBluetoothDevice = CloseDriver.Core.Models.BluetoothDevice;
 
 namespace CloseDriver.Bluetooth.Windows;
@@ -27,6 +28,7 @@ public class WindowsBluetoothService : IBluetoothService
 
 	public event EventHandler<CoreBluetoothDevice>? DeviceDiscovered;
 	public event EventHandler<byte[]>? DataReceived;
+	public event EventHandler<ScanStatus>? ScanStatusChanged;
 
 	public bool IsScanning { get; private set; }
 
@@ -43,7 +45,12 @@ public class WindowsBluetoothService : IBluetoothService
 		_discoveredDevices.Clear();
 		_advertisementCount = 0;
 
-		await LogRadioStateAsync();
+		var radioCheck = await CheckRadioAsync();
+		if (radioCheck != null)
+		{
+			RaiseStatus(radioCheck);
+			return;
+		}
 
 		_watcher = new BluetoothLEAdvertisementWatcher
 		{
@@ -56,37 +63,65 @@ public class WindowsBluetoothService : IBluetoothService
 		_watcher.Received += OnAdvertisementReceived;
 		_watcher.Stopped += OnWatcherStopped;
 
-		_watcher.Start();
+		try
+		{
+			_watcher.Start();
+		}
+		catch (Exception ex)
+		{
+			_logger?.LogError(ex, "Failed to start BLE advertisement watcher.");
+			RaiseStatus(new ScanStatus(false, $"Failed to start scan: {ex.Message}", true));
+			return;
+		}
+
 		IsScanning = true;
 		_logger?.LogInformation("BLE advertisement watcher started (ScanningMode=Active, Status={Status}).", _watcher.Status);
+		RaiseStatus(new ScanStatus(true, "Scanning for devices...", false));
 	}
 
-	private async Task LogRadioStateAsync()
+	private async Task<ScanStatus?> CheckRadioAsync()
 	{
 		try
 		{
 			var radios = await Radio.GetRadiosAsync();
 			var bt = radios.FirstOrDefault(r => r.Kind == RadioKind.Bluetooth);
 			if (bt == null)
+			{
 				_logger?.LogWarning("No Bluetooth radio found on this machine.");
-			else if (bt.State != RadioState.On)
+				return new ScanStatus(false, "No Bluetooth radio was found on this machine.", true);
+			}
+			if (bt.State != RadioState.On)
+			{
 				_logger?.LogWarning("Bluetooth radio state is {State}; scan will return no results until it is On.", bt.State);
-			else
-				_logger?.LogInformation("Bluetooth radio '{Name}' is On.", bt.Name);
+				return new ScanStatus(false, $"Bluetooth radio is {bt.State}. Turn Bluetooth on and try again.", true);
+			}
+			_logger?.LogInformation("Bluetooth radio '{Name}' is On.", bt.Name);
+			return null;
 		}
 		catch (Exception ex)
 		{
 			_logger?.LogWarning(ex, "Failed to query Bluetooth radio state.");
+			return new ScanStatus(false, $"Could not query Bluetooth radio: {ex.Message}", true);
 		}
+	}
+
+	private void RaiseStatus(ScanStatus status)
+	{
+		ScanStatusChanged?.Invoke(this, status);
 	}
 
 	private void OnWatcherStopped(BluetoothLEAdvertisementWatcher sender, BluetoothLEAdvertisementWatcherStoppedEventArgs args)
 	{
 		IsScanning = false;
 		if (args.Error == BluetoothError.Success)
+		{
 			_logger?.LogInformation("BLE advertisement watcher stopped normally. Ads seen: {Count}.", _advertisementCount);
+		}
 		else
+		{
 			_logger?.LogError("BLE advertisement watcher stopped with error: {Error}. Ads seen: {Count}.", args.Error, _advertisementCount);
+			RaiseStatus(new ScanStatus(false, $"Scan stopped: {args.Error}", true));
+		}
 	}
 
 	private void OnAdvertisementReceived(BluetoothLEAdvertisementWatcher sender, BluetoothLEAdvertisementReceivedEventArgs args)
