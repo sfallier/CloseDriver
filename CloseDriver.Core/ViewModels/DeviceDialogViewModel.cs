@@ -42,20 +42,49 @@ public partial class DeviceDialogViewModel : ObservableObject
 
 	private void OnDeviceDiscovered(object? sender, BluetoothDevice device)
 	{
-		// Must be marshalled to the UI thread in WPF, but ObservableCollection in Core
-		// will rely on WPF binding dispatcher or we handle it in the View.
-		// For simplicity, assuming the caller marshals or we use BindingOperations.EnableCollectionSynchronization
-
 		var existingDevice = DiscoveredDevices.FirstOrDefault(d => d.Id == device.Id);
 		if (existingDevice == null)
 		{
-			DiscoveredDevices.Add(device);
+			InsertSorted(device);
 		}
 		else
 		{
-			// Update RSSI
 			existingDevice.Rssi = device.Rssi;
+
+			// If the name was upgraded from "(unnamed)" to a real name, re-insert at the
+			// correct sorted position.
+			if (device.Name != existingDevice.Name)
+			{
+				existingDevice.Name = device.Name;
+				var idx = DiscoveredDevices.IndexOf(existingDevice);
+				DiscoveredDevices.RemoveAt(idx);
+				InsertSorted(existingDevice);
+			}
 		}
+	}
+
+	private void InsertSorted(BluetoothDevice device)
+	{
+		for (int i = 0; i < DiscoveredDevices.Count; i++)
+		{
+			if (CompareDeviceNames(device.Name, DiscoveredDevices[i].Name) < 0)
+			{
+				DiscoveredDevices.Insert(i, device);
+				return;
+			}
+		}
+		DiscoveredDevices.Add(device);
+	}
+
+	private static int CompareDeviceNames(string a, string b)
+	{
+		bool aUnnamed = a.StartsWith("(unnamed)", StringComparison.Ordinal);
+		bool bUnnamed = b.StartsWith("(unnamed)", StringComparison.Ordinal);
+
+		if (aUnnamed != bUnnamed)
+			return aUnnamed ? 1 : -1;
+
+		return string.Compare(a, b, StringComparison.OrdinalIgnoreCase);
 	}
 
 	[RelayCommand]
