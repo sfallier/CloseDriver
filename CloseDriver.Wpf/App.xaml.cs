@@ -2,6 +2,7 @@
 using System.IO;
 using System.Windows;
 using CloseDriver.Core.Interfaces;
+using CloseDriver.Core.Protocol;
 using CloseDriver.Core.ViewModels;
 using CloseDriver.Wpf.Converters;
 using CloseDriver.Bluetooth.Windows;
@@ -53,11 +54,12 @@ public partial class App : Application
 
 		// Register Services
 		services.AddSingleton<IBluetoothService, WindowsBluetoothService>();
+		services.AddSingleton<FardriverFrameReassembler>();
 
 		// Register ViewModels
 		services.AddTransient<MainViewModel>();
 		services.AddTransient<DeviceDialogViewModel>();
-		services.AddTransient<SettingsViewModel>();
+		services.AddSingleton<SettingsViewModel>();
 
 		// Register Views
 		services.AddTransient<MainWindow>();

@@ -28,11 +28,11 @@ public partial class MainViewModel : ObservableObject, IDisposable
 		_bluetoothService.DataReceived += OnDataReceived;
 	}
 
-	private async void OnDataReceived(object sender, byte[] data)
+	private void OnDataReceived(object sender, byte[] data)
 	{
 		if (IsLogging && _dataLogger != null)
 		{
-			await _dataLogger.LogDataAsync(data, isTransmit: false);
+			_dataLogger.LogDataAsync(data, isTransmit: false);
 		}
 	}
 

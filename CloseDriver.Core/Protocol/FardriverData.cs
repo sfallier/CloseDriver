@@ -3,104 +3,116 @@ using System.Runtime.InteropServices;
 namespace CloseDriver.Core.Protocol;
 
 /// <summary>
-/// Port of the FarDriverData C++ struct from jackhumbert/fardriver-controllers.
-/// Packed structure representing the 512-byte payload.
-/// Note: C# doesn't support bitfields directly in StructLayout, so we must use
-/// properties to mask and shift the underlying bytes/words.
+/// Wraps the 512-byte FardriverData buffer assembled by FardriverFrameReassembler.
+/// All byte offsets: bufferOffset = address * 2 (little-endian, matching STM32 layout).
+/// Offsets verified against XeProS-Stock.heb and fardriver.hpp from jackhumbert/fardriver-controllers.
 /// </summary>
 [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 512)]
-public struct FarDriverData
+public struct FardriverData
 {
-	// The C++ struct defines 26 separate 12-byte chunks (Addr00, Addr06, ..., AddrD0)
-	// plus some skipped bytes. To correctly map this, we can either define the exact byte offsets
-	// using FieldOffset, or map out the 512 byte array and use properties to read.
-	// Given the complexity of the bitfields and offsets, a fixed size array buffer with accessor properties
-	// is often the most robust way in C# to port C++ structs with bitfields.
-
 	[MarshalAs(UnmanagedType.ByValArray, SizeConst = 512)]
 	public byte[] Buffer;
 
-	// Example properties based on the C++ struct
+	// ── Addr06 (base = 0x06 * 2 = 12) ──────────────────────────────────────
+	// Layout: byte0=cfg06l, byte1=MorseCode, byte2=SpeedKI, byte3=SpeedKP,
+	//         byte4=ThrottleLow(/20→V), byte5=ThrottleHigh(/20→V),
+	//         byte6-7=FAIF, byte8-9=CurveTime, byte10-11=cfg0Bl/cfg0Bh
+	public float ThrottleLow  => GetByte(16) / 20f;
+	public float ThrottleHigh => GetByte(17) / 20f;
 
-	// Addr00 (Offset 0x00 * 2 = 0)
-	public short VolCoeff => GetInt16(0);
-	public short Voltage2Coeff => GetInt16(2);
-	public short PhaseACoeff => GetInt16(4);
-	public short LineCoeff => GetInt16(6);
-	public short PhaseCCoeff => GetInt16(8);
-	public short SaveNum => GetInt16(10);
-
-	// Addr06 (Offset 0x06 * 2 = 12)
-	// byte 12 (2, 0x06)
-	// uint8_t Arg2 : 1;
-	// AntiTheftPulse : 2; 
-	// uint8_t unk02a : 1;
-	// uint8_t Protocol485 : 4;
-	public byte Addr06_Byte2 => GetByte(12);
-	public int Protocol485 => (Addr06_Byte2 >> 4) & 0x0F;
-
-	// byte 13 (3)
-	public byte Addr06_Byte3 => GetByte(13);
-	public int MorseCode => Addr06_Byte3 & 0x7F;
-
-	// byte 14 (4, 0x07)
-	public byte SpeedKI => GetByte(14);
-	public byte SpeedKP => GetByte(15);
-
-	// byte 16 (6, 0x08)
-	public byte ThrottleLow => GetByte(16);
-	public byte ThrottleHigh => GetByte(17);
-
-	// byte 18-19 (8-9, 0x09)
-	public short FAIF => GetInt16(18);
-
-	// byte 20-21 (10-11, 0x0A)
-	public short CurveTime => GetInt16(20);
-
-	// byte 22 (12, 0x0B)
-	public byte Addr06_Byte12 => GetByte(22);
-	public int BrakeConfig => Addr06_Byte12 & 0x0F;
-	public int TempSensor => (Addr06_Byte12 >> 4) & 0x07;
-	public bool PhaseExchange => ((Addr06_Byte12 >> 7) & 0x01) == 1;
-
-	// Addr0C (Offset 0x0C * 2 = 24)
-	public short PhaseOffset => GetInt16(24);
+	// ── Addr0C (base = 0x0C * 2 = 24) ──────────────────────────────────────
+	// Layout: byte0-1=PhaseOffset, byte2-3=ZeroBattCoeff, byte4-5=FullBattCoeff, ...
 	public short ZeroBattCoeff => GetInt16(26);
 	public short FullBattCoeff => GetInt16(28);
 
-	// Addr12 (Offset 0x12 * 2 = 36)
-	public short LD => GetInt16(36 + 2); // offset 2-3 of Addr12
-	public ushort MaxSpeed => GetUInt16(36 + 6); // offset 6-7 (0x15)
-	public ushort RatedPower => GetUInt16(36 + 8); // offset 8-9 (0x16)
-	public ushort RatedVoltage => GetUInt16(36 + 10); // offset 10-11 (0x17)
+	// ── Addr12 (base = 0x12 * 2 = 36) ──────────────────────────────────────
+	// Layout: byte0-1=LD, byte2-3=AlarmDelay, byte4=PolePairs, byte5=unk14b,
+	//         byte6-7=MaxSpeed, byte8-9=RatedPower, byte10-11=RatedVoltage
+	public byte   PolePairs => GetByte(40);
+	public ushort MaxSpeed  => GetUInt16(42);
 
-	// Addr18 (Offset 0x18 * 2 = 48)
-	public ushort RatedSpeed => GetUInt16(48 + 2);
-	public ushort MaxLineCurr => GetUInt16(48 + 4);
+	// ── Addr18 (base = 0x18 * 2 = 48) ──────────────────────────────────────
+	// Layout: byte0-1=RatedSpeed, byte2-3=MaxLineCurr(/4→A), byte4=cfg26l,
+	//         byte5=cfg26h, byte6-7=LQ, byte8-9=BattRatedCap, byte10-11=IntRes
+	public ushort RatedSpeed           => GetUInt16(48);
+	public ushort MaxLineCurrRaw       => GetUInt16(50);
+	public float  MaxLineCurrent       => MaxLineCurrRaw / 4f;
+	public ushort BatteryRatedCapacity => GetUInt16(56);
 
-	// AddrE2 (Offset 0xE2 * 2 = 452)
-	public ushort MeasureSpeed => GetUInt16(452 + 8); // 8-9, 0xE5
+	// ── Addr24 (base = 0x24 * 2 = 72) ──────────────────────────────────────
+	// Layout: byte0=TimeMin, byte1=TimeSecond, byte2-3=HighVolProtect,
+	//         byte4-5=CustomMaxLineCurr, byte6-7=CustomMaxPhaseCurr,
+	//         byte8-9=BackSpeed (= LowSpeed in app UI), byte10-11=LowSpeed (creep)
+	// App "LowSpeed" (5000) maps to the BackSpeed field at byte8-9 → buf[80]
+	public ushort LowSpeed => GetUInt16(80);
 
-	// AddrE8 (Offset 0xE8 * 2 = 464)
-	public short DeciVolts => GetInt16(464 + 2); // 2-3 E8
-	public short LineCurrent => GetInt16(464 + 6); // 6-7 EA
+	// ── Addr2A (base = 0x2A * 2 = 84) ──────────────────────────────────────
+	// Layout: byte0-1=MidSpeed, byte2-3=Max_Dec, byte4=FreeThrottle, byte5=unk,
+	//         byte6-7=MaxPhaseCurr(/4→A), byte8-9=SpeedAnalog, byte10-11=Max_Acc
+	public ushort MiddleSpeed     => GetUInt16(84);
+	public ushort MaxPhaseCurrRaw => GetUInt16(90);
+	public float  MaxPhaseCurrent => MaxPhaseCurrRaw / 4f;
 
-	// AddrF4 (Offset 0xF4 * 2 = 488)
-	public short MotorTemp => GetInt16(488 + 0);
+	// ── Addr30 (base = 0x30 * 2 = 96) ──────────────────────────────────────
+	// Layout: byte0-1=StopBackCurr, byte2-3=MaxBackCurr,
+	//         byte4=LowSpeedLineCurr, byte5=MidSpeedLineCurr,
+	//         byte6=LowSpeedPhaseCurr, byte7=MidSpeedPhaseCurr, ...
+	// Ratio formula: (rawByte * 100 / 128.0) + 0.5
+	public ushort StopBackCurrent  => GetUInt16(96);
+	public ushort MaxBackCurrent   => GetUInt16(98);
+	public float  LowSpeedLineRatio  => GetByte(100) * 100f / 128f + 0.5f;
+	public float  MidSpeedLineRatio  => GetByte(101) * 100f / 128f + 0.5f;
+	public float  LowSpeedPhaseRatio => GetByte(102) * 100f / 128f + 0.5f;
+	public float  MidSpeedPhaseRatio => GetByte(103) * 100f / 128f + 0.5f;
 
-	// AddrD6 (Offset 0xD6 * 2 = 428)
-	public short MosTemp => GetInt16(428 + 10); // 10-11
+	// ── AddrD0 (base = 0xD0 * 2 = 416) ──────────────────────────────────────
+	// Layout (verified against XeProS-Stock.heb AddrD0 chunk at heb[300..311]):
+	//   byte0=Data0, byte1=Data1, byte2=BMQHALL, byte3=AVGPower,
+	//   byte4=WheelRatio, byte5=WheelRadius, byte6=AVGSpeed, byte7=WheelWidth,
+	//   byte8-9=RateRatio(/1000=GearRatio), byte10-11=OneCommCfg
+	public byte   WheelRatio => GetByte(420);
+	public byte   WheelRadius => GetByte(421);
+	public byte   WheelWidth  => GetByte(423);
+	public ushort RateRatio   => GetUInt16(424);
+	public float  GearRatio   => RateRatio / 1000f;
 
-	// AddrD0 (Offset 0xD0 * 2 = 416)
-	public byte WheelRatio => GetByte(416 + 6);
-	public byte WheelRadius => GetByte(416 + 7);
-	public byte WheelWidth => GetByte(416 + 9);
-	public ushort RateRatio => GetUInt16(416 + 10);
+	// ── AddrE2 (base = 0xE2 * 2 = 452) — Live telemetry ────────────────────
+	// MeasureSpeed: uint16 at byte8 → buf[460]
+	public ushort MeasureSpeed => GetUInt16(460);
 
-	// AddrBE (Offset 0xBE * 2 = 380)
-	public ushort TorqueCoeff => GetUInt16(380 + 10);
+	// ── AddrE8 (base = 0xE8 * 2 = 464) — Live telemetry ────────────────────
+	// Layout from live log frame AA A4 D6 02 1E 00...:
+	//   frame[2..13] → buf[464..475]
+	//   DeciVolts:   int16 at byte2 → buf[466], /10 → volts
+	//   LineCurrent: int16 at byte6 → buf[470], /4 → amps
+	public short DeciVolts   => GetInt16(466);
+	public short LineCurrent => GetInt16(470);
 
-	// Helper Math Properties
+	// ── AddrF4 (base = 0xF4 * 2 = 488) — Live telemetry ────────────────────
+	// MotorTemp: int16 at byte0 → buf[488], raw °C
+	public short MotorTemp => GetInt16(488);
+
+	// ── AddrD6 (base = 0xD6 * 2 = 428) — Live telemetry ────────────────────
+	// MosTemp: int16 at byte10 → buf[438], raw °C
+	public short MosTemp => GetInt16(438);
+
+	// ── Dashboard computed properties ────────────────────────────────────────
+	public float Voltage             => DeciVolts / 10f;
+	public float LineCurrentAmps     => LineCurrent / 4f;
+	public float MotorTempFahrenheit => MotorTemp * 9f / 5f + 32f;
+	public float MosTempFahrenheit   => MosTemp * 9f / 5f + 32f;
+
+	public float BatteryPercentage
+	{
+		get
+		{
+			int range = FullBattCoeff - ZeroBattCoeff;
+			if (range == 0)
+				return 0;
+			return 100f * (DeciVolts - ZeroBattCoeff) / range;
+		}
+	}
+
 	public float SpeedKph
 	{
 		get
@@ -111,13 +123,7 @@ public struct FarDriverData
 		}
 	}
 
-	public float MotorTempFahrenheit => MotorTemp * 9f / 5f + 32f;
-	public float MosTempFahrenheit => MosTemp * 9f / 5f + 32f;
-	public float BatteryPercentage => (FullBattCoeff - ZeroBattCoeff) == 0 ? 0 : 100f * (DeciVolts - ZeroBattCoeff) / (FullBattCoeff - ZeroBattCoeff);
-	public float LineCurrentAmps => LineCurrent / 4f;
-	public float Voltage => DeciVolts / 10f;
-
-	// Utility methods for reading bytes assuming Little-Endian (which is standard for BLE and STM32)
+	// ── Utility ──────────────────────────────────────────────────────────────
 	private byte GetByte(int offset)
 	{
 		if (Buffer == null || offset >= Buffer.Length)

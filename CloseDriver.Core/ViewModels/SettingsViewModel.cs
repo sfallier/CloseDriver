@@ -9,47 +9,67 @@ namespace CloseDriver.Core.ViewModels;
 public partial class SettingsViewModel : ObservableObject, IDisposable
 {
 	private readonly IBluetoothService _bluetoothService;
+	private readonly FardriverFrameReassembler _reassembler;
 	private readonly SynchronizationContext _syncContext;
 
-	// Nullable so bindings against CurrentData.* short-circuit (returning UnsetValue)
-	// before the first frame arrives, instead of dereferencing the uninitialized
-	// FarDriverData.Buffer through property getters.
 	[ObservableProperty]
-	private FarDriverData _currentData;
+	private FardriverData _currentData;
 
-	public SettingsViewModel(IBluetoothService bluetoothService)
+	[ObservableProperty]
+	private bool _hasData;
+
+	[ObservableProperty]
+	private int _framesAccepted;
+
+	[ObservableProperty]
+	private int _framesRejectedBadCrc;
+
+	[ObservableProperty]
+	private int _framesRejectedMalformed;
+
+	public SettingsViewModel(IBluetoothService bluetoothService, FardriverFrameReassembler reassembler)
 	{
 		_bluetoothService = bluetoothService;
+		_reassembler = reassembler;
 		_syncContext = SynchronizationContext.Current;
 		_bluetoothService.DataReceived += OnDataReceived;
 	}
 
 	private void OnDataReceived(object sender, byte[] data)
 	{
-		if (data != null && data.Length >= 512)
-		{
-			try
-			{
-				// In a real scenario we'd need to buffer data until we have a full 512-byte frame
-				// and identify the start/end markers. For now, assuming data is exactly the 512 byte struct
-				var parsedData = FarDriverProtocolParser.Parse(data);
+		if (data == null || data.Length != 16)
+			return;
 
-				// Update properties on UI thread via the MVVM toolkit
-				if (_syncContext != null)
-				{
-					_syncContext.Send(_ => CurrentData = parsedData, null);
-				}
-				else
-				{
-					CurrentData = parsedData;
-				}
-			}
-			catch (Exception ex)
-			{
-				// Log or handle parsing errors
-				System.Diagnostics.Debug.WriteLine($"Failed to parse frame: {ex.Message}");
-			}
+		if (!_reassembler.TryIngest(data, out _))
+		{
+			UpdateDiagnostics();
+			return;
 		}
+
+		var snapshot = _reassembler.Snapshot();
+
+		if (_syncContext != null)
+		{
+			_syncContext.Send(_ =>
+			{
+				CurrentData = snapshot;
+				HasData = true;
+				UpdateDiagnostics();
+			}, null);
+		}
+		else
+		{
+			CurrentData = snapshot;
+			HasData = true;
+			UpdateDiagnostics();
+		}
+	}
+
+	private void UpdateDiagnostics()
+	{
+		FramesAccepted = _reassembler.FramesAccepted;
+		FramesRejectedBadCrc = _reassembler.FramesRejectedBadCrc;
+		FramesRejectedMalformed = _reassembler.FramesRejectedMalformed;
 	}
 
 	public void Dispose()
