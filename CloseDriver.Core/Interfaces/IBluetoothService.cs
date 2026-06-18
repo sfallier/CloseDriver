@@ -13,7 +13,7 @@ public interface IBluetoothService
 
 	bool IsScanning { get; }
 
-	Task StartScanningAsync();
+	Task StartScanningAsync(BleScanMode mode = BleScanMode.ControllersOnly);
 	Task StopScanningAsync();
 
 	Task<bool> ConnectAsync(BluetoothDevice device);

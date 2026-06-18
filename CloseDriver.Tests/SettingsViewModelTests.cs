@@ -26,8 +26,7 @@ public class SettingsViewModelTests
 		mockService.Raise(s => s.DataReceived += null, mockService.Object, payload);
 
 		// Assert
-		Assert.NotNull(viewModel.CurrentData);
-		Assert.NotNull(viewModel.CurrentData.Value.Buffer);
-		Assert.Equal(720, viewModel.CurrentData.Value.DeciVolts);
+		Assert.NotNull(viewModel.CurrentData.Buffer);
+		Assert.Equal(720, viewModel.CurrentData.DeciVolts);
 	}
 }

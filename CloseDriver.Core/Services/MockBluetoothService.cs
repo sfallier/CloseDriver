@@ -7,13 +7,13 @@ namespace CloseDriver.Core.Services;
 
 public class MockBluetoothService : IBluetoothService
 {
-	public event EventHandler<BluetoothDevice>? DeviceDiscovered;
-	public event EventHandler<byte[]>? DataReceived;
-	public event EventHandler<ScanStatus>? ScanStatusChanged;
+	public event EventHandler<BluetoothDevice> DeviceDiscovered;
+	public event EventHandler<byte[]> DataReceived;
+	public event EventHandler<ScanStatus> ScanStatusChanged;
 
 	public bool IsScanning { get; private set; }
 
-	public async Task StartScanningAsync()
+	public async Task StartScanningAsync(BleScanMode mode = BleScanMode.ControllersOnly)
 	{
 		if (IsScanning)
 			return;
@@ -27,13 +27,13 @@ public class MockBluetoothService : IBluetoothService
 			await Task.Delay(500);
 			if (IsScanning)
 			{
-				DeviceDiscovered?.Invoke(this, new BluetoothDevice { Id = "MOCK-1", Name = "FarDriver-Mock1", Rssi = -50 });
+				DeviceDiscovered?.Invoke(this, new BluetoothDevice { Id = "MOCK-1", Name = "CONTROLDM-Mock1", Rssi = -50, Kind = DeviceKind.FarDriverController });
 			}
 
 			await Task.Delay(1000);
 			if (IsScanning)
 			{
-				DeviceDiscovered?.Invoke(this, new BluetoothDevice { Id = "MOCK-2", Name = "FarDriver-Mock2", Rssi = -70 });
+				DeviceDiscovered?.Invoke(this, new BluetoothDevice { Id = "MOCK-2", Name = "CONTROLDM-Mock2", Rssi = -70, Kind = DeviceKind.FarDriverController });
 			}
 		});
 

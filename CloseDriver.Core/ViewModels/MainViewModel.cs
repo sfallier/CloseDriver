@@ -12,12 +12,12 @@ namespace CloseDriver.Core.ViewModels;
 public partial class MainViewModel : ObservableObject, IDisposable
 {
 	private readonly IBluetoothService _bluetoothService;
-	private DataLogger? _dataLogger;
+	private DataLogger _dataLogger;
 
 	[ObservableProperty]
 	[NotifyCanExecuteChangedFor(nameof(DisconnectCommand))]
 	[NotifyCanExecuteChangedFor(nameof(ToggleLoggingCommand))]
-	private BluetoothDevice? _connectedDevice;
+	private BluetoothDevice _connectedDevice;
 
 	[ObservableProperty]
 	private bool _isLogging;
@@ -28,7 +28,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
 		_bluetoothService.DataReceived += OnDataReceived;
 	}
 
-	private async void OnDataReceived(object? sender, byte[] data)
+	private async void OnDataReceived(object sender, byte[] data)
 	{
 		if (IsLogging && _dataLogger != null)
 		{
@@ -71,16 +71,15 @@ public partial class MainViewModel : ObservableObject, IDisposable
 	{
 		if (IsLogging)
 		{
-			_dataLogger?.Stop();
+			_dataLogger?.Dispose();
+			_dataLogger = null;
 			IsLogging = false;
 		}
 		else
 		{
-			var folderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			var filePath = Path.Combine(folderPath, "CloseDriver", $"Log_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
+			var filePath = Path.Combine(AppContext.BaseDirectory, "CloseDriver", $"{ConnectedDevice.Name}_Log_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
 
 			_dataLogger = new DataLogger(filePath);
-			_dataLogger.Start();
 			IsLogging = true;
 		}
 	}

@@ -19,17 +19,16 @@ public class DataLoggerTests : IDisposable
 	public async Task LogDataAsync_WritesCorrectlyFormattedHex()
 	{
 		// Arrange
-		using var logger = new DataLogger(_testFilePath);
-		logger.Start();
+		using (var logger = new DataLogger(_testFilePath))
+		{
 
-		var testDataRx = new byte[] { 0x5A, 0x01, 0xFF, 0x00, 0x1B };
-		var testDataTx = new byte[] { 0xA5, 0x02, 0xEE };
+			var testDataRx = new byte[] { 0x5A, 0x01, 0xFF, 0x00, 0x1B };
+			var testDataTx = new byte[] { 0xA5, 0x02, 0xEE };
 
-		// Act
-		await logger.LogDataAsync(testDataRx, isTransmit: false);
-		await logger.LogDataAsync(testDataTx, isTransmit: true);
-
-		logger.Stop(); // Flush and close
+			// Act
+			await logger.LogDataAsync(testDataRx, isTransmit: false);
+			await logger.LogDataAsync(testDataTx, isTransmit: true);
+		}
 
 		// Assert
 		Assert.True(File.Exists(_testFilePath));

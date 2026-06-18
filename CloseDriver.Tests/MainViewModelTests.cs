@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using CloseDriver.Core.Interfaces;
+using CloseDriver.Core.Models;
 using CloseDriver.Core.ViewModels;
 using Moq;
 using Xunit;
@@ -22,6 +23,6 @@ public class MainViewModelTests
 
 		// Assert - As per MainViewModel implementation, this is currently a placeholder
 		// and does NOT call StartScanningAsync.
-		mockService.Verify(s => s.StartScanningAsync(), Times.Never);
+		mockService.Verify(s => s.StartScanningAsync(It.IsAny<BleScanMode>()), Times.Never);
 	}
 }

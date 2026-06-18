@@ -8,48 +8,26 @@ namespace CloseDriver.Core.Services;
 public class DataLogger : IDisposable
 {
 	private readonly string _filePath;
-	private StreamWriter? _writer;
-	private bool _isLogging;
-
-	public bool IsLogging => _isLogging;
+	private StreamWriter _writer;
 
 	public DataLogger(string filePath)
 	{
 		_filePath = filePath;
-	}
-
-	public void Start()
-	{
-		if (_isLogging)
-			return;
-
 		var directory = Path.GetDirectoryName(_filePath);
 		if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
 		{
 			Directory.CreateDirectory(directory);
 		}
 
-		_writer = new StreamWriter(_filePath, append: true, Encoding.UTF8)
+		_writer = new StreamWriter(_filePath, append: false, Encoding.UTF8)
 		{
 			AutoFlush = true
 		};
-		_isLogging = true;
-	}
-
-	public void Stop()
-	{
-		_isLogging = false;
-		if (_writer != null)
-		{
-			_writer.Flush();
-			_writer.Dispose();
-			_writer = null;
-		}
 	}
 
 	public async Task LogDataAsync(byte[] data, bool isTransmit = false)
 	{
-		if (!_isLogging || _writer == null || data == null || data.Length == 0)
+		if (_writer == null || data == null || data.Length == 0)
 			return;
 
 		var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
@@ -62,6 +40,11 @@ public class DataLogger : IDisposable
 
 	public void Dispose()
 	{
-		Stop();
+		if (_writer != null)
+		{
+			_writer.Flush();
+			_writer.Dispose();
+			_writer = null;
+		}
 	}
 }

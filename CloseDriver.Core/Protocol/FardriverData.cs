@@ -36,20 +36,20 @@ public struct FarDriverData
 	// AntiTheftPulse : 2; 
 	// uint8_t unk02a : 1;
 	// uint8_t Protocol485 : 4;
-	public byte Addr06_Byte2 => Buffer[12];
+	public byte Addr06_Byte2 => GetByte(12);
 	public int Protocol485 => (Addr06_Byte2 >> 4) & 0x0F;
 
 	// byte 13 (3)
-	public byte Addr06_Byte3 => Buffer[13];
+	public byte Addr06_Byte3 => GetByte(13);
 	public int MorseCode => Addr06_Byte3 & 0x7F;
 
 	// byte 14 (4, 0x07)
-	public byte SpeedKI => Buffer[14];
-	public byte SpeedKP => Buffer[15];
+	public byte SpeedKI => GetByte(14);
+	public byte SpeedKP => GetByte(15);
 
 	// byte 16 (6, 0x08)
-	public byte ThrottleLow => Buffer[16];
-	public byte ThrottleHigh => Buffer[17];
+	public byte ThrottleLow => GetByte(16);
+	public byte ThrottleHigh => GetByte(17);
 
 	// byte 18-19 (8-9, 0x09)
 	public short FAIF => GetInt16(18);
@@ -58,7 +58,7 @@ public struct FarDriverData
 	public short CurveTime => GetInt16(20);
 
 	// byte 22 (12, 0x0B)
-	public byte Addr06_Byte12 => Buffer[22];
+	public byte Addr06_Byte12 => GetByte(22);
 	public int BrakeConfig => Addr06_Byte12 & 0x0F;
 	public int TempSensor => (Addr06_Byte12 >> 4) & 0x07;
 	public bool PhaseExchange => ((Addr06_Byte12 >> 7) & 0x01) == 1;
@@ -92,9 +92,9 @@ public struct FarDriverData
 	public short MosTemp => GetInt16(428 + 10); // 10-11
 
 	// AddrD0 (Offset 0xD0 * 2 = 416)
-	public byte WheelRatio => Buffer[416 + 6];
-	public byte WheelRadius => Buffer[416 + 7];
-	public byte WheelWidth => Buffer[416 + 9];
+	public byte WheelRatio => GetByte(416 + 6);
+	public byte WheelRadius => GetByte(416 + 7);
+	public byte WheelWidth => GetByte(416 + 9);
 	public ushort RateRatio => GetUInt16(416 + 10);
 
 	// AddrBE (Offset 0xBE * 2 = 380)
@@ -118,6 +118,13 @@ public struct FarDriverData
 	public float Voltage => DeciVolts / 10f;
 
 	// Utility methods for reading bytes assuming Little-Endian (which is standard for BLE and STM32)
+	private byte GetByte(int offset)
+	{
+		if (Buffer == null || offset >= Buffer.Length)
+			return 0;
+		return Buffer[offset];
+	}
+
 	private short GetInt16(int offset)
 	{
 		if (Buffer == null || offset + 1 >= Buffer.Length)
