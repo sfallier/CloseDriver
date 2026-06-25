@@ -1,5 +1,9 @@
 # CloseDriver Coding Guidelines
 
+## Use Windows style line endings
+
+We're developing for Windows as the primary platform, and writing and building the code on Windows.  All generated code should use CRLF line endings.  Do not generate code with Unix-style LF line endings.
+
 ## No LINQ — Ever
 
 `System.Linq` is **banned** in this project. This is enforced at compile time via `<Using Remove="System.Linq" />` in every `.csproj`.
