@@ -9,7 +9,7 @@ namespace CloseDriver.Tests;
 public class SettingsViewModelTests
 {
 	// Valid 16-byte frame: AA A4 D6 02 1E 00 00 00 00 00 00 00 00 00 12 E2
-	// id=0x24 → addr=0xE8 → offset=464; data[2]=0xD6, data[3]=0x02 → DeciVolts=0x021E=542 at buf[466]
+	// id=0x24 → addr=0xE8 → offset=464; frame[2..3]=D6 02 → buf[464..465] → DeciVolts=0x02D6=726
 	private static readonly byte[] s_validFrame = new byte[16]
 	{ 0xAA, 0xA4, 0xD6, 0x02, 0x1E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12, 0xE2 };
 
@@ -35,9 +35,8 @@ public class SettingsViewModelTests
 		mockService.Raise(s => s.DataReceived += null, mockService.Object, s_validFrame);
 
 		Assert.NotNull(viewModel.CurrentData.Buffer);
-		// frame[2..3] = D6 02 → buf[464..465]; frame[4..5] = 1E 00 → buf[466..467]
-		// DeciVolts reads buf[466..467] = 1E 00 = 30
-		Assert.Equal(30, viewModel.CurrentData.DeciVolts);
+		// frame[2..3] = D6 02 → buf[464..465]; DeciVolts reads buf[464..465] = D6 02 = 0x02D6 = 726
+		Assert.Equal(726, viewModel.CurrentData.DeciVolts);
 	}
 
 	[Fact]

@@ -25,7 +25,7 @@
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,2">
                             <TextBlock Text="Battery: " FontWeight="Bold" Width="100"/>
-                            <TextBlock Text="{Binding CurrentData.BatteryPercentage, StringFormat={}{0:F1} %}"/>
+                            <TextBlock Text="{Binding CurrentData.BatteryPercentage, Converter={StaticResource FloatToPercentConverter}}"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,2">
                             <TextBlock Text="Speed: " FontWeight="Bold" Width="100"/>

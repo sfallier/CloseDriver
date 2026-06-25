@@ -77,16 +77,17 @@ public struct FardriverData
 	public float  GearRatio   => RateRatio / 1000f;
 
 	// ── AddrE2 (base = 0xE2 * 2 = 452) — Live telemetry ────────────────────
-	// MeasureSpeed: uint16 at byte8 → buf[460]
-	public ushort MeasureSpeed => GetUInt16(460);
+	// MeasureSpeed: uint16 at struct byte6-7 → buf[458]  (hpp comment "// 8-9" = BLE frame byte pos; struct byte = frame byte - 2)
+	public ushort MeasureSpeed => GetUInt16(458);
 
 	// ── AddrE8 (base = 0xE8 * 2 = 464) — Live telemetry ────────────────────
-	// Layout from live log frame AA A4 D6 02 1E 00...:
+	// Layout confirmed from live log frame AA A4 D7 02 20 00 00 00 00 00 00 00 00 00:
 	//   frame[2..13] → buf[464..475]
-	//   DeciVolts:   int16 at byte2 → buf[466], /10 → volts
-	//   LineCurrent: int16 at byte6 → buf[470], /4 → amps
-	public short DeciVolts   => GetInt16(466);
-	public short LineCurrent => GetInt16(470);
+	//   DeciVolts:   int16 at struct byte0-1 → buf[464], /10 → volts
+	//   LineCurrent: int16 at struct byte4-5 → buf[468], /4 → amps
+	//   (hpp "// 2-3" and "// 6-7" are BLE frame byte positions; struct byte = frame byte - 2)
+	public short DeciVolts   => GetInt16(464);
+	public short LineCurrent => GetInt16(468);
 
 	// ── AddrF4 (base = 0xF4 * 2 = 488) — Live telemetry ────────────────────
 	// MotorTemp: int16 at byte0 → buf[488], raw °C
@@ -107,8 +108,8 @@ public struct FardriverData
 		get
 		{
 			int range = FullBattCoeff - ZeroBattCoeff;
-			if (range == 0)
-				return 0;
+			if (range <= 0 || ZeroBattCoeff == 0)
+				return float.NaN;
 			return 100f * (DeciVolts - ZeroBattCoeff) / range;
 		}
 	}
