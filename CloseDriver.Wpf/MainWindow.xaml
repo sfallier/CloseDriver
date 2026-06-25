@@ -32,6 +32,13 @@
 			</StackPanel>
 		</Grid>
 		
-		<views:SettingsView x:Name="DashboardView" Grid.Row="1" Margin="0,10,0,0"/>
+		<TabControl Grid.Row="1" Margin="0,10,0,0">
+			<TabItem Header="Dashboard">
+				<views:DashboardView x:Name="DashboardView"/>
+			</TabItem>
+			<TabItem Header="Configuration">
+				<views:ConfigurationView x:Name="ConfigurationView"/>
+			</TabItem>
+		</TabControl>
 	</Grid>
 </Window>

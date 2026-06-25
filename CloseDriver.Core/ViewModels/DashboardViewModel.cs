@@ -6,7 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CloseDriver.Core.ViewModels;
 
-public partial class SettingsViewModel : ObservableObject, IDisposable
+public partial class DashboardViewModel : ObservableObject, IDisposable
 {
 	private readonly IBluetoothService _bluetoothService;
 	private readonly FardriverFrameReassembler _reassembler;
@@ -27,7 +27,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
 	[ObservableProperty]
 	private int _framesRejectedMalformed;
 
-	public SettingsViewModel(IBluetoothService bluetoothService, FardriverFrameReassembler reassembler)
+	public DashboardViewModel(IBluetoothService bluetoothService, FardriverFrameReassembler reassembler)
 	{
 		_bluetoothService = bluetoothService;
 		_reassembler = reassembler;

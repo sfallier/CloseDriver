@@ -3,11 +3,11 @@ using System.Windows.Controls;
 namespace CloseDriver.Wpf.Views;
 
 /// <summary>
-/// Interaction logic for DashboardView.xaml
+/// Interaction logic for ConfigurationView.xaml
 /// </summary>
-public partial class DashboardView : UserControl
+public partial class ConfigurationView : UserControl
 {
-	public DashboardView()
+	public ConfigurationView()
 	{
 		InitializeComponent();
 	}

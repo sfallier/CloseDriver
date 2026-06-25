@@ -6,7 +6,7 @@ using Xunit;
 
 namespace CloseDriver.Tests;
 
-public class SettingsViewModelTests
+public class DashboardViewModelTests
 {
 	// Valid 16-byte frame: AA A4 D6 02 1E 00 00 00 00 00 00 00 00 00 12 E2
 	// id=0x24 → addr=0xE8 → offset=464; frame[2..3]=D6 02 → buf[464..465] → DeciVolts=0x02D6=726
@@ -18,7 +18,7 @@ public class SettingsViewModelTests
 	{
 		var mockService = new Mock<IBluetoothService>();
 		var reassembler = new FardriverFrameReassembler();
-		var viewModel = new SettingsViewModel(mockService.Object, reassembler);
+		var viewModel = new DashboardViewModel(mockService.Object, reassembler);
 
 		mockService.Raise(s => s.DataReceived += null, mockService.Object, s_validFrame);
 
@@ -30,7 +30,7 @@ public class SettingsViewModelTests
 	{
 		var mockService = new Mock<IBluetoothService>();
 		var reassembler = new FardriverFrameReassembler();
-		var viewModel = new SettingsViewModel(mockService.Object, reassembler);
+		var viewModel = new DashboardViewModel(mockService.Object, reassembler);
 
 		mockService.Raise(s => s.DataReceived += null, mockService.Object, s_validFrame);
 
@@ -44,7 +44,7 @@ public class SettingsViewModelTests
 	{
 		var mockService = new Mock<IBluetoothService>();
 		var reassembler = new FardriverFrameReassembler();
-		var viewModel = new SettingsViewModel(mockService.Object, reassembler);
+		var viewModel = new DashboardViewModel(mockService.Object, reassembler);
 
 		mockService.Raise(s => s.DataReceived += null, mockService.Object, s_validFrame);
 
@@ -56,7 +56,7 @@ public class SettingsViewModelTests
 	{
 		var mockService = new Mock<IBluetoothService>();
 		var reassembler = new FardriverFrameReassembler();
-		var viewModel = new SettingsViewModel(mockService.Object, reassembler);
+		var viewModel = new DashboardViewModel(mockService.Object, reassembler);
 
 		var badFrame = new byte[16];
 		s_validFrame.CopyTo(badFrame, 0);

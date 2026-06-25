@@ -11,17 +11,19 @@ namespace CloseDriver.Wpf;
 public partial class MainWindow : Window
 {
 	private readonly MainViewModel _viewModel;
-	private readonly SettingsViewModel _settingsViewModel;
+	private readonly DashboardViewModel _dashboardViewModel;
+	private readonly ConfigurationViewModel _configurationViewModel;
 
-	public MainWindow(MainViewModel viewModel, SettingsViewModel settingsViewModel)
+	public MainWindow(MainViewModel viewModel, DashboardViewModel dashboardViewModel, ConfigurationViewModel configurationViewModel)
 	{
 		InitializeComponent();
 		_viewModel = viewModel;
-		_settingsViewModel = settingsViewModel;
+		_dashboardViewModel = dashboardViewModel;
+		_configurationViewModel = configurationViewModel;
 		DataContext = _viewModel;
 
-		// Pass the settings view model to the SettingsView control
-		DashboardView.DataContext = _settingsViewModel;
+		DashboardView.DataContext = _dashboardViewModel;
+		ConfigurationView.DataContext = _configurationViewModel;
 	}
 
 	private async void ScanButton_Click(object sender, RoutedEventArgs e)

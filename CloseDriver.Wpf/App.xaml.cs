@@ -4,7 +4,6 @@ using System.Windows;
 using CloseDriver.Core.Interfaces;
 using CloseDriver.Core.Protocol;
 using CloseDriver.Core.ViewModels;
-using CloseDriver.Wpf.Converters;
 using CloseDriver.Bluetooth.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -23,11 +22,6 @@ public partial class App : Application
 
 	public App()
 	{
-		// App.xaml has no StartupUri (DI owns MainWindow creation), so WPF's markup
-		// compiler does not generate InitializeComponent for App and the resources
-		// declared in App.xaml are never loaded. Register them in code instead.
-		Resources["NullToVisibilityConverter"] = new NullToVisibilityConverter();
-
 		var logPath = Path.Combine(AppContext.BaseDirectory, "CloseDriver.log");
 		Log.Logger = new LoggerConfiguration()
 			.MinimumLevel.Debug()
@@ -59,7 +53,8 @@ public partial class App : Application
 		// Register ViewModels
 		services.AddTransient<MainViewModel>();
 		services.AddTransient<DeviceDialogViewModel>();
-		services.AddSingleton<SettingsViewModel>();
+		services.AddSingleton<DashboardViewModel>();
+		services.AddSingleton<ConfigurationViewModel>();
 
 		// Register Views
 		services.AddTransient<MainWindow>();
