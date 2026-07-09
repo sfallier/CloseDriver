@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <Resource Include="Assets\CloseDriver.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CloseDriver.Core\CloseDriver.Core.csproj" />
     <ProjectReference Include="..\CloseDriver.Bluetooth.Windows\CloseDriver.Bluetooth.Windows.csproj" />
   </ItemGroup>
@@ -22,6 +26,7 @@
          disables the CET-compat PE flag so the .NET 9 runtime doesn't fail-fast on startup.
          Remove this once the host OS is updated to 22H2+ (build 22621+). -->
     <CETCompat>false</CETCompat>
+    <ApplicationIcon>Assets\CloseDriver.ico</ApplicationIcon>
   </PropertyGroup>
 
 </Project>
