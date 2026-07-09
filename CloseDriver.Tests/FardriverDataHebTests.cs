@@ -118,17 +118,24 @@ public class FardriverDataHebTests
     }
 
     [Fact]
-    public void LowSpeed_Is5000()
+    public void Mode2MaxSpeed_Is5000()
     {
         var d = LoadHeb();
-        Assert.Equal(5000, d.LowSpeed);
+        Assert.Equal(5000, d.Mode2MaxSpeed);
     }
 
     [Fact]
-    public void MiddleSpeed_Is7000()
+    public void Mode3MaxSpeed_Is7000()
     {
         var d = LoadHeb();
-        Assert.Equal(7000, d.MiddleSpeed);
+        Assert.Equal(7000, d.Mode3MaxSpeed);
+    }
+
+    [Fact]
+    public void ReverseRpm_Is1000()
+    {
+        var d = LoadHeb();
+        Assert.Equal(1000, d.ReverseRpm);
     }
 
     [Fact]
@@ -171,5 +178,141 @@ public class FardriverDataHebTests
     {
         var d = LoadHeb();
         Assert.Equal(4.7f, d.GearRatio, 0.01f);
+    }
+
+    [Fact]
+    public void PhaseOffset_Is30Point6()
+    {
+        var d = LoadHeb();
+        Assert.Equal(30.6f, d.PhaseOffset, 0.1f);
+    }
+
+    [Fact]
+    public void RatedVoltage_Is72V()
+    {
+        var d = LoadHeb();
+        Assert.Equal(72.0f, d.RatedVoltage, 0.1f);
+    }
+
+    [Fact]
+    public void MaxPhaseCurrent_Is450A()
+    {
+        var d = LoadHeb();
+        Assert.Equal(450f, d.MaxPhaseCurrent, 0.1f);
+    }
+
+    [Fact]
+    public void BoostLineCurrent_Is250A()
+    {
+        var d = LoadHeb();
+        Assert.Equal(250f, d.BoostLineCurrentAmps, 0.1f);
+    }
+
+    [Fact]
+    public void BoostPhaseCurrent_Is550A()
+    {
+        var d = LoadHeb();
+        Assert.Equal(550f, d.BoostPhaseCurrentAmps, 0.1f);
+    }
+
+    [Fact]
+    public void ThrottleAccelStep_Is224()
+    {
+        var d = LoadHeb();
+        Assert.Equal(224, d.ThrottleAccelStep);
+    }
+
+    [Fact]
+    public void ThrottleDecelStep_Is224()
+    {
+        var d = LoadHeb();
+        Assert.Equal(224, d.ThrottleDecelStep);
+    }
+
+    [Fact]
+    public void FreeThrottle_Is0()
+    {
+        var d = LoadHeb();
+        Assert.Equal(0, d.FreeThrottle);
+    }
+
+    [Fact]
+    public void LD_Is900()
+    {
+        var d = LoadHeb();
+        Assert.Equal(900, d.LD);
+    }
+
+    [Fact]
+    public void LQ_Is329()
+    {
+        var d = LoadHeb();
+        Assert.Equal(329, d.LQ);
+    }
+
+    [Fact]
+    public void FAIF_Is513()
+    {
+        var d = LoadHeb();
+        Assert.Equal(513, d.FAIF);
+    }
+
+    [Fact]
+    public void RPMSpeedLimit_Is9000()
+    {
+        var d = LoadHeb();
+        Assert.Equal(9000, d.RPMSpeedLimit);
+    }
+
+    [Fact]
+    public void MotorDirection_IsClockwise()
+    {
+        var d = LoadHeb();
+        Assert.Equal(MotorDirection.Clockwise, d.MotorDirection);
+    }
+
+    [Fact]
+    public void TempSensorType_IsNTC10K()
+    {
+        var d = LoadHeb();
+        Assert.Equal(TempSensorType.NTC10K, d.TempSensorType);
+    }
+
+    [Fact]
+    public void PhaseExchange_IsFalse()
+    {
+        var d = LoadHeb();
+        Assert.False(d.PhaseExchange);
+    }
+
+    [Fact]
+    public void ThrottleResponse_IsLinear()
+    {
+        var d = LoadHeb();
+        Assert.Equal(ThrottleResponseType.Linear, d.ThrottleResponse);
+    }
+
+    [Fact]
+    public void FollowMode_IsEabsWhenBrake()
+    {
+        var d = LoadHeb();
+        Assert.Equal(FollowMode.EabsWhenBrake, d.FollowMode);
+    }
+
+    [Fact]
+    public void PowerCurve_FirstAndLastPoints_MatchHeb()
+    {
+        var d = LoadHeb();
+        Assert.Equal(75f, d.GetPowerCurvePercent(0), 1f);
+        Assert.Equal(15f, d.GetPowerCurvePercent(19), 1f);
+    }
+
+    [Fact]
+    public void RegenCurve_NegativePoints_MatchHeb()
+    {
+        var d = LoadHeb();
+        Assert.Equal(-13f, d.GetRegenCurvePercent(0), 1f);
+        // Last point in the Addr9A chunk is 0 in this stock file.
+        Assert.Equal(0f, d.GetRegenCurvePercent(19), 1f);
     }
 }

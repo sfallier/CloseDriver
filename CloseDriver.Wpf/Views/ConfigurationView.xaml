@@ -1,66 +1,240 @@
 <UserControl x:Class="CloseDriver.Wpf.Views.ConfigurationView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:CloseDriver.Wpf.Views"
-             mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800">
-    <UserControl.Resources>
-        <Style x:Key="SectionGroupBox" TargetType="GroupBox">
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="Padding" Value="5"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-        </Style>
-        <Style x:Key="PlaceholderText" TargetType="TextBlock">
-            <Setter Property="FontStyle" Value="Italic"/>
-            <Setter Property="FontWeight" Value="Normal"/>
-            <Setter Property="Foreground" Value="Gray"/>
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="Text" Value="(coming soon)"/>
-        </Style>
-    </UserControl.Resources>
-    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                  HorizontalScrollBarVisibility="Disabled"
-                  Padding="10">
-        <StackPanel Orientation="Vertical">
+			 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:local="clr-namespace:CloseDriver.Wpf.Views"
+			 xmlns:controls="clr-namespace:CloseDriver.Wpf.Controls"
+			 mc:Ignorable="d"
+			 d:DesignHeight="600" d:DesignWidth="800">
+	<UserControl.Resources>
+		<Style x:Key="SectionGroupBox" TargetType="GroupBox">
+			<Setter Property="Margin" Value="5"/>
+			<Setter Property="Padding" Value="8"/>
+			<Setter Property="FontWeight" Value="Bold"/>
+		</Style>
+		<Style x:Key="PlaceholderText" TargetType="TextBlock">
+			<Setter Property="FontStyle" Value="Italic"/>
+			<Setter Property="FontWeight" Value="Normal"/>
+			<Setter Property="Foreground" Value="Gray"/>
+			<Setter Property="Margin" Value="5"/>
+			<Setter Property="Text" Value="(coming soon)"/>
+		</Style>
+		<Style x:Key="Label" TargetType="TextBlock">
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="Margin" Value="0,2"/>
+		</Style>
+		<Style x:Key="Value" TargetType="TextBlock">
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="Margin" Value="5,2,0,2"/>
+		</Style>
+		<Style x:Key="WaitText" TargetType="TextBlock">
+			<Setter Property="FontStyle" Value="Italic"/>
+			<Setter Property="Foreground" Value="Gray"/>
+			<Setter Property="Margin" Value="5"/>
+		</Style>
+	</UserControl.Resources>
+	<ScrollViewer VerticalScrollBarVisibility="Auto"
+				  HorizontalScrollBarVisibility="Disabled"
+				  Padding="10">
+		<StackPanel Orientation="Vertical">
 
-            <GroupBox Header="Motor Parameters" Style="{StaticResource SectionGroupBox}">
-                <TextBlock Style="{StaticResource PlaceholderText}"/>
-            </GroupBox>
+			<GroupBox Header="Motor Parameters" Style="{StaticResource SectionGroupBox}">
+				<Grid>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto"/>
+						<ColumnDefinition Width="*"/>
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+					</Grid.RowDefinitions>
 
-            <GroupBox Header="Power Curve" Style="{StaticResource SectionGroupBox}">
-                <TextBlock Style="{StaticResource PlaceholderText}"/>
-            </GroupBox>
+					<TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource Label}" Text="Phase Offset:"/>
+					<TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.PhaseOffset, StringFormat={}{0:F1} °}"/>
 
-            <GroupBox Header="Regen Settings" Style="{StaticResource SectionGroupBox}">
-                <TextBlock Style="{StaticResource PlaceholderText}"/>
-            </GroupBox>
+					<TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource Label}" Text="Motor Direction:"/>
+					<TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.MotorDirection}"/>
 
-            <GroupBox Header="Drive Mode Settings" Style="{StaticResource SectionGroupBox}">
-                <TextBlock Style="{StaticResource PlaceholderText}"/>
-            </GroupBox>
+					<TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource Label}" Text="Temperature Sensor:"/>
+					<TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.TempSensorType}"/>
 
-            <GroupBox Header="Feature Settings" Style="{StaticResource SectionGroupBox}">
-                <TextBlock Style="{StaticResource PlaceholderText}"/>
-            </GroupBox>
+					<TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource Label}" Text="Phase Exchange:"/>
+					<TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.PhaseExchange}"/>
 
-            <GroupBox Header="Display Settings" Style="{StaticResource SectionGroupBox}">
-                <TextBlock Style="{StaticResource PlaceholderText}"/>
-            </GroupBox>
+					<TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource Label}" Text="Pole Pairs:"/>
+					<TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.PolePairs}"/>
 
-            <GroupBox Header="Safety Settings" Style="{StaticResource SectionGroupBox}">
-                <TextBlock Style="{StaticResource PlaceholderText}"/>
-            </GroupBox>
+					<TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource Label}" Text="Max RPM:"/>
+					<TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.MaxSpeed}"/>
 
-            <GroupBox Header="PID Parameters" Style="{StaticResource SectionGroupBox}">
-                <TextBlock Style="{StaticResource PlaceholderText}"/>
-            </GroupBox>
+					<TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource Label}" Text="Rated Voltage:"/>
+					<TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.RatedVoltage, StringFormat={}{0:F1} V}"/>
 
-            <GroupBox Header="Read Only Parameters" Style="{StaticResource SectionGroupBox}">
-                <TextBlock Style="{StaticResource PlaceholderText}"/>
-            </GroupBox>
+					<TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource Label}" Text="Rated RPM:"/>
+					<TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.RatedSpeed}"/>
 
-        </StackPanel>
-    </ScrollViewer>
+					<TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource Label}" Text="Reverse RPM:"/>
+					<TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.ReverseRpm}"/>
+
+					<TextBlock Grid.Row="9" Grid.Column="0" Style="{StaticResource Label}" Text="Max Line Current:"/>
+					<TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.MaxLineCurrent, StringFormat={}{0:F1} A}"/>
+
+					<TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource Label}" Text="Max Phase Current:"/>
+					<TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.MaxPhaseCurrent, StringFormat={}{0:F1} A}"/>
+
+					<TextBlock Grid.Row="11" Grid.Column="0" Style="{StaticResource Label}" Text="Boost Line Current:"/>
+					<TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.BoostLineCurrentAmps, StringFormat={}{0:F1} A}"/>
+
+					<TextBlock Grid.Row="12" Grid.Column="0" Style="{StaticResource Label}" Text="Boost Phase Current:"/>
+					<TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.BoostPhaseCurrentAmps, StringFormat={}{0:F1} A}"/>
+
+					<TextBlock Grid.Row="13" Grid.Column="0" Style="{StaticResource Label}" Text="Throttle Response:"/>
+					<TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.ThrottleResponse}"/>
+
+					<TextBlock Grid.Row="14" Grid.Column="0" Style="{StaticResource Label}" Text="Follow (Regen Trigger):"/>
+					<TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.FollowMode}"/>
+
+					<TextBlock Grid.Row="15" Grid.Column="0" Style="{StaticResource Label}" Text="Throttle Accel Step:"/>
+					<TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.ThrottleAccelStep}"/>
+
+					<TextBlock Grid.Row="16" Grid.Column="0" Style="{StaticResource Label}" Text="Throttle Decel Step:"/>
+					<TextBlock Grid.Row="16" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.ThrottleDecelStep}"/>
+
+					<TextBlock Grid.Row="17" Grid.Column="0" Style="{StaticResource Label}" Text="Throttle Closed:"/>
+					<TextBlock Grid.Row="17" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.ThrottleLow, StringFormat={}{0:F2} V}"/>
+
+					<TextBlock Grid.Row="18" Grid.Column="0" Style="{StaticResource Label}" Text="Throttle Open:"/>
+					<TextBlock Grid.Row="18" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.ThrottleHigh, StringFormat={}{0:F2} V}"/>
+				</Grid>
+			</GroupBox>
+
+			<GroupBox Header="Power Curve" Style="{StaticResource SectionGroupBox}">
+				<StackPanel>
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+						</Grid.RowDefinitions>
+						<TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource Label}" Text="LD:"/>
+						<TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.LD}"/>
+						<TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource Label}" Text="LQ:"/>
+						<TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.LQ}"/>
+						<TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource Label}" Text="FAIF:"/>
+						<TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.FAIF}"/>
+						<TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource Label}" Text="RPM Limit:"/>
+						<TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.RPMSpeedLimit}"/>
+					</Grid>
+					<TextBlock Text="Current Limit % vs RPM" FontWeight="Bold" Margin="0,10,0,5" FontSize="12"/>
+					<controls:CurveChart Data="{Binding CurrentData}" IsRegen="False" Title="RPM" Height="200" Margin="0,5"/>
+				</StackPanel>
+			</GroupBox>
+
+			<GroupBox Header="Regen Settings" Style="{StaticResource SectionGroupBox}">
+				<StackPanel>
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+						</Grid.RowDefinitions>
+						<TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource Label}" Text="Stop Back Current:"/>
+						<TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.StopBackCurrent, StringFormat={}{0} A}"/>
+						<TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource Label}" Text="Max Back Current:"/>
+						<TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.MaxBackCurrent, StringFormat={}{0} A}"/>
+						<TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource Label}" Text="Battery Rated Capacity:"/>
+						<TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.BatteryRatedCapacity, StringFormat={}{0} Ah}"/>
+						<TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource Label}" Text="Free Throttle:"/>
+						<TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.FreeThrottle}"/>
+					</Grid>
+					<TextBlock Text="Regen % vs RPM" FontWeight="Bold" Margin="0,10,0,5" FontSize="12"/>
+					<controls:CurveChart Data="{Binding CurrentData}" IsRegen="True" Title="RPM" Height="200" Margin="0,5"/>
+				</StackPanel>
+			</GroupBox>
+
+			<GroupBox Header="Drive Mode Settings" Style="{StaticResource SectionGroupBox}">
+				<Grid>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto"/>
+						<ColumnDefinition Width="*"/>
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+					</Grid.RowDefinitions>
+					<TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Mode 2" FontWeight="Bold" Margin="0,5" FontSize="12"/>
+					<TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource Label}" Text="Line Current %:"/>
+					<TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.LowSpeedLineRatio, StringFormat={}{0:F1} %}"/>
+					<TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource Label}" Text="Phase %:"/>
+					<TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.LowSpeedPhaseRatio, StringFormat={}{0:F1} %}"/>
+					<TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource Label}" Text="Max Motor Speed:"/>
+					<TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.Mode2MaxSpeed, StringFormat={}{0} rpm}"/>
+					<TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Text="Mode 3" FontWeight="Bold" Margin="0,10,5,5" FontSize="12"/>
+					<TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource Label}" Text="Line Current %:"/>
+					<TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.MidSpeedLineRatio, StringFormat={}{0:F1} %}"/>
+					<TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource Label}" Text="Phase %:"/>
+					<TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.MidSpeedPhaseRatio, StringFormat={}{0:F1} %}"/>
+					<TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource Label}" Text="Max Motor Speed:"/>
+					<TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource Value}" Text="{Binding CurrentData.Mode3MaxSpeed, StringFormat={}{0} rpm}"/>
+				</Grid>
+			</GroupBox>
+
+			<GroupBox Header="Feature Settings" Style="{StaticResource SectionGroupBox}">
+				<TextBlock Style="{StaticResource PlaceholderText}"/>
+			</GroupBox>
+
+			<GroupBox Header="Display Settings" Style="{StaticResource SectionGroupBox}">
+				<TextBlock Style="{StaticResource PlaceholderText}"/>
+			</GroupBox>
+
+			<GroupBox Header="Safety Settings" Style="{StaticResource SectionGroupBox}">
+				<TextBlock Style="{StaticResource PlaceholderText}"/>
+			</GroupBox>
+
+			<GroupBox Header="PID Parameters" Style="{StaticResource SectionGroupBox}">
+				<TextBlock Style="{StaticResource PlaceholderText}"/>
+			</GroupBox>
+
+			<GroupBox Header="Read Only Parameters" Style="{StaticResource SectionGroupBox}">
+				<TextBlock Style="{StaticResource PlaceholderText}"/>
+			</GroupBox>
+
+		</StackPanel>
+	</ScrollViewer>
 </UserControl>

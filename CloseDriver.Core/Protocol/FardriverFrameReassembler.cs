@@ -31,6 +31,7 @@ public class FardriverFrameReassembler
     private static readonly byte[] s_telemetryAddrs = new byte[] { 0xE2, 0xE8, 0xEE };
 
     private readonly byte[] _buffer = new byte[512];
+    private readonly bool[] _addressReceived = new bool[256];
     private readonly object _lock = new object();
 
     public int FramesAccepted { get; private set; }
@@ -92,12 +93,45 @@ public class FardriverFrameReassembler
         {
             for (int i = 0; i < 12; i++)
                 _buffer[offset + i] = frame[2 + i];
+            _addressReceived[addr] = true;
             FramesAccepted++;
         }
 
         info = new FrameInfo(id, addr, isTelemetry);
         FrameIngested?.Invoke(this, info);
         return true;
+    }
+
+    /// <summary>
+    /// Returns true if a valid frame carrying the given base address has been received
+    /// since this reassembler was created.
+    /// </summary>
+    public bool HasAddress(byte addr)
+    {
+        lock (_lock)
+        {
+            return _addressReceived[addr];
+        }
+    }
+
+    /// <summary>
+    /// Returns true when every distinct address in the flashReadAddr rotation
+    /// (telemetry and settings alike) has been received at least once.
+    /// </summary>
+    public bool SettingsComplete
+    {
+        get
+        {
+            lock (_lock)
+            {
+                for (int i = 0; i < s_flashReadAddr.Length; i++)
+                {
+                    if (!_addressReceived[s_flashReadAddr[i]])
+                        return false;
+                }
+                return true;
+            }
+        }
     }
 
     /// <summary>

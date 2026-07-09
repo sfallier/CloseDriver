@@ -140,4 +140,47 @@ public class FardriverFrameReassemblerTests
         // snap1 and snap2 are independent copies
         Assert.NotSame(snap1.Buffer, snap2.Buffer);
     }
+
+    [Fact]
+    public void HasAddress_AfterIngest_ReturnsTrueForThatAddress()
+    {
+        var r = new FardriverFrameReassembler();
+        Assert.False(r.HasAddress(0xE8));
+
+        r.TryIngest(s_validFrameA4, out _);
+
+        Assert.True(r.HasAddress(0xE8));
+    }
+
+    [Fact]
+    public void SettingsComplete_OnlyAfterAllAddressesReceived()
+    {
+        var r = new FardriverFrameReassembler();
+        Assert.False(r.SettingsComplete);
+
+        // Ingest the three telemetry frames only — not all settings addresses.
+        r.TryIngest(s_validFrameA3, out _); // E2
+        r.TryIngest(s_validFrameA4, out _); // E8
+        Assert.False(r.SettingsComplete);
+
+        // Ingest the remaining 52 distinct non-telemetry addresses.
+        for (int id = 0; id < 55; id++)
+        {
+            byte[] frame = BuildFrameForId((byte)id);
+            r.TryIngest(frame, out _);
+        }
+
+        Assert.True(r.SettingsComplete);
+    }
+
+    private static byte[] BuildFrameForId(byte id)
+    {
+        var frame = new byte[16];
+        frame[0] = 0xAA;
+        frame[1] = (byte)(0x80 | id);
+        var (hi, lo) = FardriverCrc.Compute(frame, 14);
+        frame[14] = hi;
+        frame[15] = lo;
+        return frame;
+    }
 }
