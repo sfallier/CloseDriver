@@ -89,7 +89,7 @@ Free Throttle: 0  (not sure if this is a boolean, enum, or integer)
 Brake Voltage: 0.31V  (I think this is the threshold value from the brake switch signal to indicate the rider is braking, and determines when braking regen is applied)
 
 ## Drive Mode Settings  
-These are from the 'Ratios in Gear' section in the FarDriver app.  It appears 'gear' is a bad translation of 'mode'.  I suspect 'LowSpeed' indicates settings for mode '2' on the dash, and 'MiddleSpeed' correlates to mode '3', and drive mode '4' uses 100% of the line current, phase current, and motor speed.  I don't know what drives the settings for mode '1' (aka, Eco).
+These are from the 'Ratios in Gear' section in the FarDriver app.  It appears 'gear' is a bad translation of 'mode'.  'LowSpeed' indicates settings for mode '1' (Eco) on the dash, and 'MiddleSpeed' correlates to mode '2' (Tour), and drive mode '3' (STD) uses 100% of the line current, phase current, and motor speed.  Mode '4' (Sport) is driven by the Boost settings.
 Mode 1 Line Current Percent: 40%  (LowSpeedLineRatio in FarDriver.  Appears to specify a percentage of Max Line Current setting for Mode 1)
 Mode 1 Phase Percent: 60%  (LowSpeedPhaseRatio in FarDriver.  Appears to specify a percentage of Max Phase Current setting for Mode 1)
 Mode 1 Max Motor Speed: 5000rpm
